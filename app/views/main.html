@@ -1,35 +1,58 @@
 <form>
-  <label for="clientId">Client ID</label>
-  <input ng-model="clientId" id="clientId" type="text" />
+  <fieldset>
+    <label for="clientId">Client ID</label>
+    <input ng-model="clientId" id="clientId" type="text" />
 
-  <label for="clientSecret">Client Secret</label>
-  <input ng-model="clientSecret" id="clientSecret" type="text" />
+    <label for="clientSecret">Client Secret</label>
+    <input ng-model="clientSecret" id="clientSecret" type="text" />
+  </fieldset>
 
-  <label for="repositoryId">Repository ID</label>
-  <input ng-model="repositoryId" id="repositoryId" type="text" />
+  <fieldset>
+    <label for="repositoryId">Repository ID</label>
+    <input ng-model="repositoryId" id="repositoryId" type="text" />
 
-  <label for="since">Since</label>
-  <input ng-model="since" id="since" type="text" />
+    <label for="since">Since</label>
+    <input ng-model="since" id="since" type="text" />
 
-  <label for="until">Until</label>
-  <input ng-model="until" id="until" type="text" />
+    <label for="until">Until</label>
+    <input ng-model="until" id="until" type="text" />
+  </fieldset>
 
-  <label for="page">Page</label>
-  <input ng-model="page" id="page" type="text" />
+  <fieldset>
+    <label for="page">Page</label>
+    <input ng-model="page" id="page" type="text" />
 
-  <label for="perPage">Per Page</label>
-  <input ng-model="perPage" id="perPage" type="text" />
+    <label for="perPage">Per Page</label>
+    <input ng-model="perPage" id="perPage" type="text" />
 
-  <label for="maxSteps">Max Steps</label>
-  <input ng-model="maxSteps" id="maxSteps" type="text" />
+    <label for="maxSteps">Max Steps</label>
+    <input ng-model="maxSteps" id="maxSteps" type="text" />
+  </fieldset>
+
+  <fieldset>
+    <label for="baseLife">Base Life</label>
+    <input ng-model="baseLife" id="baseLife" type="text" />
+
+    <label for="baseAttack">Base Attack</label>
+    <input ng-model="baseAttack" id="baseAttack" type="text" />
+
+    <label for="baseDefense">Base Defense</label>
+    <input ng-model="baseDefense" id="baseDefense" type="text" />
+  </fieldset>
 </form>
 
 <button ng-click="run()">Run</button>
 
-<h1>Commits</h1>
+<h1>Attack modifier: {{attackModifier}}</h1>
+<ul ng-repeat="attackModifier in attackModifiers">
+  <li>{{attackModifier.rule}} : {{attackModifier.value}}</li>
+</ul>
+
+<h1>Commit</h1>
 <ul ng-repeat="commit in commits">
   <li>SHA: {{commit.sha}}</li>
   <li>Date: {{commit.date}}</li>
+  <li>Message: {{commit.message}}</li>
   <li>Committer login: {{commit.committerLogin}}</li>
   <li>Committer ID: {{commit.committerId}}</li>
   <ul ng-repeat="file in commit.files">
@@ -46,6 +69,11 @@
 
 <h1>Users</h1>
 <ul ng-repeat="(key, user) in users">
-  <li>{{user.login}}</li>
-  <li>{{user.id}}</li>
+  <li>ID: {{user.id}}</li>
+  <ul>
+    <li>Login: {{user.login}}</li>
+    <li>Life: {{user.life}}</li>
+    <li>Attack: {{user.attack}}</li>
+    <li>Defense: {{user.defense}}</li>
+  </ul>
 </ul>

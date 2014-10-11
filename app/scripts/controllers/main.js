@@ -1,4 +1,5 @@
 'use strict';
+
 angular.module('battleGitApp')
         .factory('retreiveService', function ($http) {
           return {
@@ -40,7 +41,37 @@ angular.module('battleGitApp')
             }
           };
         })
-        .controller('MainCtrl', ['$scope', '$interval', 'retreiveService', function ($scope, $interval, retreiveService) {
+        .factory('processService', function () {
+          return {
+            processAttackModifiers: function (commit) {
+              var attackModifiers = [];
+
+              // commit.message.length.
+              if (commit.message.length < 100) {
+                attackModifiers.push({
+                  rule: 'commit.message.length < 100',
+                  value: -10
+                });
+              }
+
+              // commit.message.contains.
+              [
+                'added'
+              ].forEach(function (element) {
+                if (commit.message.toLowerCase().contains(element)) {
+                  attackModifiers.push({
+                    rule: 'commit.message.contains("' + element + '")',
+                    value: 10
+                  });
+                }
+              });
+
+              return attackModifiers;
+            }
+
+          };
+        })
+        .controller('MainCtrl', ['$scope', '$interval', 'retreiveService', 'processService', function ($scope, $interval, retreiveService, processService) {
             $scope.clientId = '3bb9d435e94403d10de1';
             $scope.clientSecret = 'eeeb700e0f2e679851fece64b0b84fba8fa35afd';
             $scope.repositoryId = 'angular/angular.js';
@@ -49,7 +80,10 @@ angular.module('battleGitApp')
             $scope.interval = 2000;
             $scope.page = 0;
             $scope.perPage = 1;
-            $scope.maxSteps = 10;
+            $scope.maxSteps = 1;
+            $scope.baseLife = 100;
+            $scope.baseAttack = 100;
+            $scope.baseDefense = 100;
 
             // Global initialization.
             $scope.users = {};
@@ -59,7 +93,10 @@ angular.module('battleGitApp')
               response.data.forEach(function (element) {
                 $scope.users[element.id] = {
                   login: element.login,
-                  id: element.id
+                  id: element.id,
+                  life: $scope.baseLife,
+                  attack: $scope.baseAttack,
+                  defense: $scope.baseDefense
                 };
               });
             });
@@ -69,9 +106,10 @@ angular.module('battleGitApp')
             $scope.run = function () {
               $interval(function () {
                 $scope.step++;
+                $scope.commits = [];
 
+                // This does not make sense, commit*s* should have been commit to simplify things.
                 retreiveService.retreiveCommits($scope.repositoryId, $scope.since, $scope.until, $scope.page + $scope.step, $scope.perPage, $scope.clientId, $scope.clientSecret).then(function (response) {
-                  $scope.commits = [];
                   response.data.forEach(function (element) {
                     var commit = {
                       sha: element.sha,
@@ -81,6 +119,19 @@ angular.module('battleGitApp')
                       committerId: element.committer.id
                     };
                     $scope.commits.push(commit);
+
+                    // Add the current user if it has not been detected until now.
+                    if (!$scope.users.hasOwnProperty(commit.committerId)) {
+                      $scope.users[commit.committerId] = {
+                        login: commit.committerLogin,
+                        id: commit.committerId,
+                        life: $scope.baseLife,
+                        attack: $scope.baseAttack,
+                        defense: $scope.baseDefense
+                      };
+
+                      console.log(commit.committerId);
+                    }
                   });
 
                   // Each retreived commit is processed one at a time.
@@ -96,7 +147,17 @@ angular.module('battleGitApp')
                             id: response.data[0].committer.id
                           };
 
-                          // All the data is ready.
+                          // All the data is ready to be processed.
+                          $scope.attackModifiers = processService.processAttackModifiers(commit);
+
+                          // Modifier aggregation.
+                          $scope.attackModifier = 0;
+                          $scope.attackModifiers.forEach(function (element) {
+                            $scope.attackModifier += element.value;
+                          });
+
+                          // Apply the modifiers.
+                          $scope.users[commit.committerId].attack += $scope.attackModifier;
                         });
                       });
                     });
