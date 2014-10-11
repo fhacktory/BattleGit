@@ -25,14 +25,17 @@
 
 <h1>Commits</h1>
 <ul ng-repeat="commit in commits">
-  <li>{{commit}}</li>
+  <li>SHA: {{commit.sha}}</li>
+  <li>Date: {{commit.date}}</li>
+  <li>Committer login: {{commit.committerLogin}}</li>
+  <li>Committer ID: {{commit.committerId}}</li>
   <ul ng-repeat="file in commit.files">
-    <li>{{file}}</li>
-    <li>{{file.filename}}</li>
-    <li>{{file.additions}}</li>
-    <li>{{file.deletions}}</li>
-    <li>{{file.status}}</li>
-    <li>{{file.patch}}</li>
+    <li>Filename: {{file.filename}}</li>
+    <li>Additions: {{file.additions}}</li>
+    <li>Deletions: {{file.deletions}}</li>
+    <li>Status: {{file.status}}</li>
+    <li>Patch: {{file.patch}}</li>
+    <li>Previous committer: {{file.previousCommitter}}</li>
   </ul>
 </ul>
 
