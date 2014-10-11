@@ -47,7 +47,6 @@ angular.module('battleGitApp')
               var attackModifiers = [];
 
               // commit.date.
-              console.log(commit.date.substring(11, 13));
               if (parseInt(commit.date.substring(11, 13)) <= 12) {
                 attackModifiers.push({
                   rule: 'commit.date.substring(11, 13) <= 12',
@@ -143,10 +142,10 @@ angular.module('battleGitApp')
                 }
                 return node;
               }
-
-              Users.forEach(function(d) {
-                find(d.login, d);
-              });
+              
+              for (var user in users) {
+                find(user.login, user);
+              };
 
               return nodes[""];
             },
@@ -228,8 +227,6 @@ angular.module('battleGitApp')
                         attack: $scope.baseAttack,
                         defense: $scope.baseDefense
                       };
-
-                      console.log(commit.committerId);
                     }
                   });
 
@@ -264,7 +261,7 @@ angular.module('battleGitApp')
                           $scope.action = processService.processAction(commit);
 
                           // Action: Apply.
-                          console.log($scope.action);
+//                          console.log($scope.action);
                           
                           var nodes = displayService.createNodesFromUsers($scope.users);
                           displayService.displayNodes($scope.battlefield, nodes);
