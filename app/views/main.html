@@ -19,9 +19,12 @@
 
   <label for="perPage">Per Page</label>
   <input ng-model="perPage" id="perPage" type="text" />
+
+  <label for="maxSteps">Max Steps</label>
+  <input ng-model="maxSteps" id="maxSteps" type="text" />
 </form>
 
-<button ng-click="retreive()">Retreive</button>
+<button ng-click="run()">Run</button>
 
 <h1>Commits</h1>
 <ul ng-repeat="commit in commits">
@@ -31,16 +34,18 @@
   <li>Committer ID: {{commit.committerId}}</li>
   <ul ng-repeat="file in commit.files">
     <li>Filename: {{file.filename}}</li>
-    <li>Additions: {{file.additions}}</li>
-    <li>Deletions: {{file.deletions}}</li>
-    <li>Status: {{file.status}}</li>
-    <li>Patch: {{file.patch}}</li>
-    <li>Previous committer: {{file.previousCommitter}}</li>
+    <ul>
+      <li>Additions: {{file.additions}}</li>
+      <li>Deletions: {{file.deletions}}</li>
+      <li>Status: {{file.status}}</li>
+      <li>Patch: {{file.patch}}</li>
+      <li>Previous committer: {{file.previousCommitter}}</li>
+    </ul>
   </ul>
 </ul>
 
-<h1>Contributors</h1>
-<ul ng-repeat="contributor in contributors">
-  <li>{{contributor.login}}</li>
-  <li>{{contributor.id}}</li>
+<h1>Users</h1>
+<ul ng-repeat="(key, user) in users">
+  <li>{{user.login}}</li>
+  <li>{{user.id}}</li>
 </ul>
