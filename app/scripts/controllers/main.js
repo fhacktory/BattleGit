@@ -46,6 +46,21 @@ angular.module('battleGitApp')
             processAttackModifiers: function (commit) {
               var attackModifiers = [];
 
+              // commit.date.
+              console.log(commit.date.substring(11, 13));
+              if (parseInt(commit.date.substring(11, 13)) <= 12) {
+                attackModifiers.push({
+                  rule: 'commit.date.substring(11, 13) <= 12',
+                  value: -10
+                });
+              }
+              if (parseInt(commit.date.substring(11, 13)) >= 12) {
+                attackModifiers.push({
+                  rule: 'commit.date.substring(11, 13) >= 12',
+                  value: -10
+                });
+              }
+
               // commit.message.length.
               if (commit.message.length < 100) {
                 attackModifiers.push({
@@ -69,7 +84,16 @@ angular.module('battleGitApp')
               return attackModifiers;
             },
             processAction: function (commit) {
-              var action = 'ACTION';
+              var action = {
+                source: '',
+                targets: []
+              };
+
+              action.source = commit.committerId;
+
+              commit.files.forEach(function (file) {
+                action.targets.push(file.previousCommitter.id);
+              });
 
               return action;
             }
@@ -233,13 +257,15 @@ angular.module('battleGitApp')
                             $scope.attackModifier += element.value;
                           });
 
-                          // Modifier: Application.
+                          // Modifier: Apply.
                           $scope.users[commit.committerId].attack += $scope.attackModifier;
 
                           // Action: Initialization.
                           $scope.action = processService.processAction(commit);
 
+                          // Action: Apply.
                           console.log($scope.action);
+                          
                           var nodes = displayService.createNodesFromUsers($scope.users);
                           displayService.displayNodes($scope.battlefield, nodes);
                         });

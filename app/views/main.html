@@ -48,6 +48,14 @@
   <li>{{attackModifier.rule}} : {{attackModifier.value}}</li>
 </ul>
 
+<h1>Action</h1>
+<ul>
+  <li>Source : {{action.source}}</li>
+  <ul ng-repeat="target in action.targets">
+    <li>Target ID: {{target}}</li>
+  </ul>
+</ul>
+
 <h1>Commit</h1>
 <ul ng-repeat="commit in commits">
   <li>SHA: {{commit.sha}}</li>
