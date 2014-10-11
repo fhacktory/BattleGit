@@ -1,5 +1,16 @@
 <form>
-  <label for="repositoryURL">Repository URL</label>
-  <input ng-model="repositoryURL" id="repositoryURL" type="text" />
+  <label for="repositoryURL">Repository ID</label>
+  <input ng-model="repositoryID" id="repositoryID" type="text" />
 </form>
+
 <button ng-click="retreive()">Retreive</button>
+
+<h1>Commits</h1>
+<ul ng-repeat="commit in commits">
+  <li>{{commit.sha}}</li>
+</ul>
+
+<h1>Contributors</h1>
+<ul ng-repeat="contributor in contributors">
+  <li>{{contributor.login}}</li>
+</ul>
