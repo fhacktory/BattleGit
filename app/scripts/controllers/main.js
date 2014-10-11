@@ -17,8 +17,8 @@ angular.module('battleGitApp')
                       });
               return promise;
             },
-            retreiveCommits: function (repositoryId, since, until, clientId, clientSecret) {
-              var promise = $http.get('https://api.github.com/repos/' + repositoryId + '/commits' + '?since=' + since + '&until=' + until + '&client_id=' + clientId + '&client_secret=' + clientSecret)
+            retreiveCommits: function (repositoryId, since, until, page, perPage, clientId, clientSecret) {
+              var promise = $http.get('https://api.github.com/repos/' + repositoryId + '/commits' + '?since=' + since + '&until=' + until + '&page=' + page + '&per_page=' + perPage + '&client_id=' + clientId + '&client_secret=' + clientSecret)
                       .success(function (data) {
                         var commits = [];
                         data.forEach(function (element) {
@@ -57,28 +57,50 @@ angular.module('battleGitApp')
                       });
               return promise;
             }
+//            ,
+//            retreiveFile: function (repositoryId, fileBlobUrl, clientId, clientSecret) {
+//              var promise = $http.get(fileBlameUrl)
+//                      .success(function (data) {
+//                        console.log(data);
+//                      })
+//                      .error(function (data, status) {
+//                        alert(fileBlameUrl);
+//                        alert('ERROR: ' + status);
+//                      });
+//              return promise;
+//            }
           };
         })
         .controller('MainCtrl', ['$scope', '$http', 'retreiveService', function ($scope, $http, retreiveService) {
             $scope.clientId = '3bb9d435e94403d10de1';
             $scope.clientSecret = 'eeeb700e0f2e679851fece64b0b84fba8fa35afd';
             $scope.repositoryId = 'angular/angular.js';
-            $scope.since = '2014-10-11T00:00:00Z';
-            $scope.until = '2014-10-11T24:00:00Z';
+            $scope.since = '2014-10-11' + 'T00:00:00Z';
+            $scope.until = '2014-10-11' + 'T24:00:00Z';
+            $scope.page = '0';
+            $scope.perPage = '1';
 
             $scope.retreive = function () {
-              retreiveService.retreiveCommits($scope.repositoryId, $scope.since, $scope.until, $scope.clientId, $scope.clientSecret).then(function (response) {
+//              retreiveService.retreiveContributors($scope.repositoryId, $scope.clientId, $scope.clientSecret).then(function (response) {
+//                $scope.contributors = response.data;
+//              });
+
+              retreiveService.retreiveCommits($scope.repositoryId, $scope.since, $scope.until, $scope.page, $scope.perPage, $scope.clientId, $scope.clientSecret).then(function (response) {
                 $scope.commits = response.data;
+
+                // Each retreived commit is processed one at a time.
                 $scope.commits.forEach(function (commit, index, array) {
                   retreiveService.retreiveCommit($scope.repositoryId, commit.sha, $scope.clientId, $scope.clientSecret).then(function (response) {
                     // Reference modification.
                     array[index].files = response.data.files;
+
+                    response.data.files.forEach(function (file, fileIndex, fileArray) {
+//                      retreiveService.retreiveFile($scope.repositoryId, file.blob_url, $scope.clientId, $scope.clientSecret).then(function (response) {
+//
+//                      });
+                    });
                   });
                 });
               });
-
-//              retreiveService.retreiveContributors($scope.repositoryId, $scope.clientId, $scope.clientSecret).then(function (response) {
-//                $scope.contributors = response.data;
-//              });
             };
           }]);
