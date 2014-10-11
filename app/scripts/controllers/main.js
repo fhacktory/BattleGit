@@ -1,17 +1,21 @@
 'use strict';
 
-/**
- * @ngdoc function
- * @name battleGitApp.controller:MainCtrl
- * @description
- * # MainCtrl
- * Controller of the battleGitApp
- */
 angular.module('battleGitApp')
-  .controller('MainCtrl', function ($scope) {
-    $scope.awesomeThings = [
-      'HTML5 Boilerplate',
-      'AngularJS',
-      'Karma'
-    ];
-  });
+        .factory('retreiveService', function ($window) {
+          return function (repositoryURL) {
+            $window.alert(repositoryURL);
+          };
+        })
+        .controller('MainCtrl', function ($scope, retreiveService) {
+          $scope.repositoryURL = 'https://github.com/fhacktory/BattleGit';
+
+          $scope.awesomeThings = [
+            'HTML5 Boilerplate',
+            'AngularJS',
+            'Karma'
+          ];
+
+          $scope.retreive = function () {
+            retreiveService($scope.repositoryURL);
+          };
+        });

@@ -8,8 +8,7 @@
  *
  * Main module of the application.
  */
-angular
-  .module('battleGitApp', [
+angular.module('battleGitApp', [
     'ngAnimate',
     'ngCookies',
     'ngResource',
