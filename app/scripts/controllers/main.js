@@ -90,12 +90,12 @@ angular.module('battleGitApp')
 
               var bundle = d3.layout.bundle();
 
-              var div = d3.select("div.ng-scope").insert("div", "h2")
+              var div = d3.select("div.ng-scope").insert("div", "form")
                 .style("top", "-80px")
                 .style("left", "-160px")
                 .style("width", w + "px")
                 .style("height", w + "px")
-                .style("position", "absolute")
+                //s.style("position", "absolute")
                 .style("-webkit-backface-visibility", "hidden");
               var svg = div.append("svg:svg")
                 .attr("width", w)
