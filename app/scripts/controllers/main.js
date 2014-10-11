@@ -241,11 +241,6 @@ angular.module('battleGitApp')
 
                       response.data.files.forEach(function (file, fileIndex, fileArray) {
                         retreiveService.retreivePreviousCommitter($scope.repositoryId, file.filename, $scope.clientId, $scope.clientSecret).then(function (response) {
-                          // Recursive function (!).
-//                          if (response.data[0].committer.id == commit.committerId) {
-//                            console.log('Not good !');
-//                          }
-
                           fileArray[fileIndex].previousCommitter = {
                             login: response.data[0].committer.login,
                             id: response.data[0].committer.id
@@ -268,7 +263,9 @@ angular.module('battleGitApp')
                           // Action: Initialization.
                           $scope.action = processService.processAction(commit);
 
+                          // Action: Apply.
                           console.log($scope.action);
+                          
                           var nodes = displayService.createNodesFromUsers($scope.users);
                           displayService.displayNodes($scope.battlefield, nodes);
                         });
