@@ -99,7 +99,77 @@ angular.module('battleGitApp')
             }
           };
         })
-        .controller('MainCtrl', ['$scope', '$interval', 'retreiveService', 'processService', function ($scope, $interval, retreiveService, processService) {
+        .factory('displayService', function () {
+          return {
+            createBattlefield: function () {
+              var w = 1280,
+                h = 800,
+                rx = w / 2,
+                ry = h / 2,
+                m0,
+                rotate = 0;
+              var cluster = d3.layout.cluster()
+                .size([360, ry - 120])
+                .sort(function(a, b) { return d3.ascending(a.key, b.key); });
+
+              var bundle = d3.layout.bundle();
+
+              var div = d3.select("div.ng-scope").insert("div", "h2")
+                .style("top", "-80px")
+                .style("left", "-160px")
+                .style("width", w + "px")
+                .style("height", w + "px")
+                .style("position", "absolute")
+                .style("-webkit-backface-visibility", "hidden");
+              var svg = div.append("svg:svg")
+                .attr("width", w)
+                .attr("height", w)
+                .append("svg:g")
+                .attr("transform", "translate(" + rx + "," + ry + ")");
+              return svg;
+            },
+            createNodesFromUsers: function (users) {
+              var nodes = {};
+              function find(name, data) {
+                var node = map[name];
+                if (!node) {
+                  node = map[name] = data || {name: name, children: []};
+                  if (name.length) {
+                    node.parent = find("");
+                    node.parent.children.push(node);
+                    node.key = name;
+                    node.name = name;
+                  }
+                }
+                return node;
+              }
+
+              Users.forEach(function(d) {
+                find(d.login, d);
+              });
+
+              return nodes[""];
+            },
+            displayNodes: function (svg, nodes) {
+                var tmp = cluster.nodes(nodes); //,
+                svg.selectAll("g.node")
+                    .data(tmp.filter(function(n) { return !n.children; }))
+                  .enter().append("svg:g")
+                    .attr("class", "node")
+                    .attr("id", function(d) { return "node-" + d.key; })
+                    .attr("transform", function(d) { return "rotate(" + (d.x - 90) + ")translate(" + d.y + ")"; })
+                  .append("svg:text")
+                    .attr("dx", function(d) { return d.x < 180 ? 8 : -8; })
+                    .attr("dy", ".31em")
+                    .attr("text-anchor", function(d) { return d.x < 180 ? "start" : "end"; })
+                    .attr("transform", function(d) { return d.x < 180 ? null : "rotate(180)"; })
+                    .text(function(d) { return d.key; })
+                    .on("mouseover", mouseover)
+                    .on("mouseout", mouseout);
+            }
+          };
+        })
+        .controller('MainCtrl', ['$scope', '$interval', 'displayService', 'retreiveService', 'processService', function ($scope, $interval, displayService, retreiveService, processService) {
             $scope.clientId = '3bb9d435e94403d10de1';
             $scope.clientSecret = 'eeeb700e0f2e679851fece64b0b84fba8fa35afd';
             $scope.repositoryId = 'angular/angular.js';
@@ -115,6 +185,7 @@ angular.module('battleGitApp')
 
             // Global initialization.
             $scope.users = {};
+            $scope.battlefield = displayService.createBattlefield();
 
             // Users initialization.
             retreiveService.retreiveContributors($scope.repositoryId, $scope.clientId, $scope.clientSecret).then(function (response) {
@@ -198,6 +269,8 @@ angular.module('battleGitApp')
                           $scope.action = processService.processAction(commit);
 
                           console.log($scope.action);
+                          var nodes = displayService.createNodesFromUsers($scope.users);
+                          displayService.displayNodes($scope.battlefield, nodes);
                         });
                       });
                     });
