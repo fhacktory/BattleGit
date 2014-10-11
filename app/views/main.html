@@ -1,6 +1,6 @@
 <form>
-  <label for="repositoryURL">Repository ID</label>
-  <input ng-model="repositoryID" id="repositoryID" type="text" />
+  <label for="repositoryId">Repository ID</label>
+  <input ng-model="repositoryId" id="repositoryId" type="text" />
 </form>
 
 <button ng-click="retreive()">Retreive</button>
@@ -8,6 +8,7 @@
 <h1>Commits</h1>
 <ul ng-repeat="commit in commits">
   <li>{{commit.sha}}</li>
+  <li>{{commit.files}}</li>
 </ul>
 
 <h1>Contributors</h1>
