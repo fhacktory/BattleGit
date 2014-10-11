@@ -67,8 +67,12 @@ angular.module('battleGitApp')
               });
 
               return attackModifiers;
-            }
+            },
+            processAction: function (commit) {
+              var action = 'ACTION';
 
+              return action;
+            }
           };
         })
         .controller('MainCtrl', ['$scope', '$interval', 'retreiveService', 'processService', function ($scope, $interval, retreiveService, processService) {
@@ -148,16 +152,23 @@ angular.module('battleGitApp')
                           };
 
                           // All the data is ready to be processed.
+
+                          // Modifier: Initialization.
                           $scope.attackModifiers = processService.processAttackModifiers(commit);
 
-                          // Modifier aggregation.
+                          // Modifier: Aggregation.
                           $scope.attackModifier = 0;
                           $scope.attackModifiers.forEach(function (element) {
                             $scope.attackModifier += element.value;
                           });
 
-                          // Apply the modifiers.
+                          // Modifier: Application.
                           $scope.users[commit.committerId].attack += $scope.attackModifier;
+
+                          // Action: Initialization.
+                          $scope.action = processService.processAction(commit);
+
+                          console.log($scope.action);
                         });
                       });
                     });
