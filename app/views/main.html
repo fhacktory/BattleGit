@@ -1,14 +1,32 @@
 <form>
+  <label for="clientId">Client ID</label>
+  <input ng-model="clientId" id="clientId" type="text" />
+
+  <label for="clientSecret">Client Secret</label>
+  <input ng-model="clientSecret" id="clientSecret" type="text" />
+
   <label for="repositoryId">Repository ID</label>
   <input ng-model="repositoryId" id="repositoryId" type="text" />
+
+  <label for="since">Since</label>
+  <input ng-model="since" id="since" type="text" />
+
+  <label for="until">Until</label>
+  <input ng-model="until" id="until" type="text" />
 </form>
 
 <button ng-click="retreive()">Retreive</button>
 
 <h1>Commits</h1>
 <ul ng-repeat="commit in commits">
-  <li>{{commit.sha}}</li>
-  <li>{{commit.files}}</li>
+  <li>{{commit}}</li>
+  <ul ng-repeat="file in commit.files">
+    <li>{{file.filename}}</li>
+    <li>{{file.additions}}</li>
+    <li>{{file.deletions}}</li>
+    <li>{{file.status}}</li>
+    <li>{{file.patch}}</li>
+  </ul>
 </ul>
 
 <h1>Contributors</h1>
