@@ -159,7 +159,10 @@ angular.module('battleGitApp')
 
               commit.files.forEach(function (file) {
                 if (file.hasOwnProperty('previousCommitter')) {
-                  action.targets.push(file.previousCommitter.login);
+                  action.targets.push({
+                    login: file.previousCommitter.login,
+                    id: file.previousCommitter.id
+                  });
                 }
               });
 
@@ -363,10 +366,10 @@ angular.module('battleGitApp')
                           // Action: Apply.
 //                          console.log($scope.action);
                           $scope.action.targets.forEach(function (target) {
-                            $scope.damage = Math.max(0, $scope.users[commit.committerId].attack - $scope.users[target].defense);
+                            $scope.damage = Math.max(0, $scope.users[commit.committerId].attack - $scope.users[target.login].defense);
 //                            console.log($scope.damage);
                             
-                            $scope.users[target].life -= $scope.damage;
+                            $scope.users[target.login].life -= $scope.damage;
                           });
                           
                           var nodes = displayService.createNodesFromUsers($scope.users);
