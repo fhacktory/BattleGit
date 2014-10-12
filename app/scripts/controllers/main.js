@@ -155,10 +155,10 @@ angular.module('battleGitApp')
                 targets: []
               };
 
-              action.source = commit.committerId;
+              action.source = commit.committerLogin;
 
               commit.files.forEach(function (file) {
-                action.targets.push(file.previousCommitter.id);
+                action.targets.push(file.previousCommitter.login);
               });
 
               return action;
@@ -200,7 +200,6 @@ angular.module('battleGitApp')
                 return node;
               }
               
-              console.log(users);
               for (var key in users) {
                 var user = users[key];
                 find(user.login, user);
@@ -249,8 +248,21 @@ angular.module('battleGitApp')
                 if (value) this.parentNode.appendChild(this);
                 $scope.battlefield.select("#node-" + d[name].key).classed(name, value);
               };
+            },
+            updateAttaques: function(svg, attaques) {
+              for (index = 0; index < attaques.length; ++index) {
+                action = attaques[index];
+                if (!action) {
+                  var bundle = d3.layout.bundle();
+                  var splines = bundle(attaques);
+                  var path = svg.selectAll("path.link")
+                    .data(attaques)
+                    .enter().append("svg:path")
+                    .attr("class", function(d) { return "link source-" + d.source.key + " target-" + d.target.key; })
+                    .attr("d", function(d, i) { return line(splines[i]); });
+                }
+              }
             }
-
           };
         })
         .controller('MainCtrl', ['$scope', '$interval', 'displayService', 'retreiveService', 'processService', function ($scope, $interval, displayService, retreiveService, processService) {
@@ -270,6 +282,7 @@ angular.module('battleGitApp')
             // Global initialization.
             $scope.users = {};
             $scope.battlefield = displayService.createBattlefield();
+            $scope.attaques = [];
 
             // Users initialization.
             retreiveService.retreiveContributors($scope.repositoryId, $scope.clientId, $scope.clientSecret).then(function (response) {
@@ -356,6 +369,11 @@ angular.module('battleGitApp')
                           
                           var nodes = displayService.createNodesFromUsers($scope.users);
                           displayService.displayNodes($scope.battlefield, nodes);
+                          $scope.attaques.push($scope.action);
+                          displayService.displayAttaques($scope.battlefield, $scope.attaques);
+                          if ($scope.attaques.length > 5) {
+                            $scope.attaques.pop();
+                          }
                         });
                       });
                     });
