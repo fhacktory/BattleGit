@@ -131,9 +131,9 @@ angular.module('battleGitApp')
             createNodesFromUsers: function (users) {
               var nodes = {};
               function find(name, data) {
-                var node = map[name];
+                var node = nodes[name];
                 if (!node) {
-                  node = map[name] = data || {name: name, children: []};
+                  node = nodes[name] = data || {name: name, children: []};
                   if (name.length) {
                     node.parent = find("");
                     node.parent.children.push(node);
@@ -144,7 +144,7 @@ angular.module('battleGitApp')
                 return node;
               }
 
-              Users.forEach(function(d) {
+              users.forEach(function(d) {
                 find(d.login, d);
               });
 
@@ -266,8 +266,8 @@ angular.module('battleGitApp')
                           // Action: Apply.
                           console.log($scope.action);
                           
-                          var nodes = displayService.createNodesFromUsers($scope.users);
-                          displayService.displayNodes($scope.battlefield, nodes);
+                          //var nodes = displayService.createNodesFromUsers($scope.users);
+                          //displayService.displayNodes($scope.battlefield, nodes);
                         });
                       });
                     });
