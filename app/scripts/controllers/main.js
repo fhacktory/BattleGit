@@ -97,8 +97,8 @@ angular.module('battleGitApp')
                       });
               return promise;
             },
-            retreivePreviousCommitter: function (repositoryId, filename, clientId, clientSecret) {
-              var promise = $http.get('https://api.github.com/repos/' + repositoryId + '/commits' + '?path=' + filename + '&page=1&per_page=1&client_id=' + clientId + '&client_secret=' + clientSecret)
+            retreivePreviousCommitters: function (repositoryId, filename, clientId, clientSecret) {
+              var promise = $http.get('https://api.github.com/repos/' + repositoryId + '/commits' + '?path=' + filename + '&page=1&per_page=10&client_id=' + clientId + '&client_secret=' + clientSecret)
                       .success(function (data) {
                       })
                       .error(function () {
@@ -158,10 +158,12 @@ angular.module('battleGitApp')
               action.source = commit.committerLogin;
 
               commit.files.forEach(function (file) {
-                if (file.hasOwnProperty('previousCommitter')) {
-                  action.targets.push({
-                    login: file.previousCommitter.login,
-                    id: file.previousCommitter.id
+                if (file.hasOwnProperty('previousCommitters')) {
+                  file.previousCommitters.forEach(function (element) {
+                    action.targets.push({
+                      login: element.login,
+                      id: element.id
+                    });
                   });
                 }
               });
@@ -174,16 +176,16 @@ angular.module('battleGitApp')
               while (attaqueCount > 0) {
                 var source = nodes[this.getRandomInt(1, nodes.length)];
                 var isMultipleAttaque = this.getRandomInt(0, 5);
-                if (isMultipleAttaque == 0) {
+                if (isMultipleAttaque === 0) {
                   nodes.forEach(function(target) {
-                    if (source != target) {
+                    if (source !== target) {
                       var attaque = {source: source, target: target};
                       attaques.push(attaque);
                     }
                   });
                 } else {
                   var target = nodes[this.getRandomInt(1, nodes.length)];
-                  if (source != target) {
+                  if (source !== target) {
                     attaques.push({source: source, target: target});
                   }
                 }
@@ -228,7 +230,6 @@ angular.module('battleGitApp')
                 }
                 return node;
               }              
-//            console.log(users);
               for (var key in users) {
                 var user = users[key];
                 find(user.login, user);
@@ -236,9 +237,7 @@ angular.module('battleGitApp')
               return nodes[""];
             },
             displayNodes: function(svg, cluster, nodes) {
-
-                
-                var tmp = cluster.nodes(nodes); //,
+                var tmp = cluster.nodes(nodes);
                 svg.selectAll("g.node")
                     .data(tmp.filter(function(n) { return !n.children; }))
                   .enter().append("svg:g")
@@ -276,11 +275,20 @@ angular.module('battleGitApp')
                 svg.select("#node-" + d[name].key).classed(name, value);
               };
             },
+            findNodeByLogin: function (login, nodes) {
+              var node;
+              nodes.forEach(function (element) {
+                if (element.login === login) {
+                  node = element;
+                }
+              });
+              return node;
+            },
             displayAttaques: function(svg, bundle, line, attaques) {
               var actions = [];
               for (var index = 0; index < attaques.length; ++index) {
                 var actions = attaques[index];
-                if (actions && actions.length != 0) {
+                if (actions && actions.length !== 0) {
                   actions.forEach(function (action) {               
                     actions.push(action);
                   });
@@ -378,12 +386,16 @@ angular.module('battleGitApp')
                       commitArray[commitIndex].files = response.data.files;
 
                       response.data.files.forEach(function (file, fileIndex, fileArray) {
-                        retreiveService.retreivePreviousCommitter($scope.repositoryId, file.filename, $scope.clientId, $scope.clientSecret).then(function (response) {
-                          fileArray[fileIndex].previousCommitter = {
-                            login: response.data[0].committer.login,
-                            id: response.data[0].committer.id
-                          };
-
+                        retreiveService.retreivePreviousCommitters($scope.repositoryId, file.filename, $scope.clientId, $scope.clientSecret).then(function (response) {
+                          fileArray[fileIndex].previousCommitters = [];
+                          
+                          response.data.forEach(function (element) {
+                            fileArray[fileIndex].previousCommitters.push({
+                              login: element.committer.login,
+                              id: element.committer.id
+                            });
+                          });
+                          
                           // All the data is ready to be processed.
 
                           // Modifier: Initialization.
@@ -401,24 +413,29 @@ angular.module('battleGitApp')
                           $scope.nodeRoot = displayService.createNodesFromUsers($scope.users);
 
                           // Action: Initialization.
-                          // $scope.action = processService.processAction(commit);
-
-                          $scope.action = processService.generateAttaques($scope.nodeRoot.children);
+                          $scope.actions = [];
+                          $scope.action = processService.processAction(commit);
+                          $scope.action.targets.forEach(function (target) {
+                            $scope.actions.push({
+                              source: displayService.findNodeByLogin($scope.action.source, $scope.nodeRoot.children),
+                              target: displayService.findNodeByLogin(target.login, $scope.nodeRoot.children),
+                            });
+                          });
+                          $scope.attaques = [];
+                          $scope.attaques.push($scope.actions);
+                          console.log($scope.attaques);
+                          
+//                          $scope.attaques = [];
+//                          $scope.attaques.push(processService.generateAttaques($scope.nodeRoot.children));
+//                          console.log($scope.attaques);
+                          
                           // Action: Apply.
-//                          console.log($scope.action);
-                          //$scope.action.targets.forEach(function (target) {
-                          //  console.log(target.login);
-                            
+                          //$scope.action.targets.forEach(function (target) {                            
                           //  $scope.damage = Math.max(0, $scope.users[commit.committerId].attack - $scope.users[target.id].defense);
-//                            console.log($scope.damage);
-                            
                           //  $scope.users[target.id].life -= $scope.damage;
                           //});
+                          
                           displayService.displayNodes($scope.battlefield, $scope.cluster, $scope.nodeRoot);
-                          $scope.attaques.push($scope.action);
-                          if ($scope.attaques.length > 5) {
-                            $scope.attaques.pop();
-                          }
                           displayService.displayAttaques($scope.battlefield, $scope.bundle, $scope.line, $scope.attaques);
                         });
                       });
