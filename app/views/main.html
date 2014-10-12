@@ -1,24 +1,26 @@
+<div class="well">
 <form>
-  <fieldset>
+  <h1>BattleGit</h1>
+<!--  <fieldset>
     <label for="clientId">Client ID</label>
     <input ng-model="clientId" id="clientId" type="text" />
 
     <label for="clientSecret">Client Secret</label>
     <input ng-model="clientSecret" id="clientSecret" type="text" />
-  </fieldset>
+  </fieldset>-->
 
   <fieldset>
     <label for="repositoryId">Repository ID</label>
     <input ng-model="repositoryId" id="repositoryId" type="text" />
 
-    <label for="since">Since</label>
+<!--    <label for="since">Since</label>
     <input ng-model="since" id="since" type="text" />
 
     <label for="until">Until</label>
-    <input ng-model="until" id="until" type="text" />
+    <input ng-model="until" id="until" type="text" />-->
   </fieldset>
 
-  <fieldset>
+<!--  <fieldset>
     <label for="page">Page</label>
     <input ng-model="page" id="page" type="text" />
 
@@ -27,9 +29,9 @@
 
     <label for="maxSteps">Max Steps</label>
     <input ng-model="maxSteps" id="maxSteps" type="text" />
-  </fieldset>
+  </fieldset>-->
 
-  <fieldset>
+<!--  <fieldset>
     <label for="baseLife">Base Life</label>
     <input ng-model="baseLife" id="baseLife" type="text" />
 
@@ -38,33 +40,88 @@
 
     <label for="baseDefense">Base Defense</label>
     <input ng-model="baseDefense" id="baseDefense" type="text" />
-  </fieldset>
+  </fieldset>-->
+  <button ng-click="run()">Run</button>
 </form>
+</div>
 
-<button ng-click="run()">Run</button>
+<div ng-repeat="panel in panels">
+  <div class="panel panel-default">
+    <div class="panel-heading">
+      {{panel.committerLogin}}
+      <!--{{panel.commitMessage}}-->
+    </div>
+    <div class="panel-body">
+      <div class="btn-group btn-group-justified">
+        <div class="btn-group">
+          <button type="button" class="btn btn-default">
+            {{panel.life}}
+            <br />
+            LIFE
+          </button>
+        </div>
+        <div class="btn-group">
+          <button type="button" class="btn btn-default">
+            {{panel.attack}} ({{panel.attackModifier}})
+            <br />
+            ATTACK
+          </button>
+        </div>
+        <div class="btn-group">
+          <button type="button" class="btn btn-default">
+            {{panel.defense}} ({{panel.defenseModifier}})
+            <br />
+            DEFENSE
+          </button>
+        </div>
+      </div>
+      
+      <ul ng-repeat="attackModifier in panel.attackModifiers">
+        <li>{{attackModifier.rule}} : {{attackModifier.value}} ATT</li>
+      </ul>
+      <ul ng-repeat="defenseModifier in panel.defenseModifiers">
+        <li>{{defenseModifier.rule}} : {{defenseModifier.value}} DEF</li>
+      </ul>
+      
+      <div class="btn-group btn-group-justified">
+        <div class="btn-group">
+          <button type="button" class="btn btn-default">
+            {{panel.damage}}
+            <br />
+            Damages
+          </button>
+        </div>
+      </div>
+      
+      <ul ng-repeat="damage in panel.damages">
+        <li>{{damage.targetLogin}} : {{damage.damage}}</li>
+      </ul>
+    </div>
+  </div>
+</div>
 
-<h1>Attack modifier: {{attackModifier}}</h1>
+<!--<h1>Attack modifier: {{attackModifier}}</h1>
 <ul ng-repeat="attackModifier in attackModifiers">
   <li>{{attackModifier.rule}} : {{attackModifier.value}}</li>
-</ul>
+</ul>-->
 
-<h1>Damages: {{damage}}</h1>
+<!--<h1>Damages: {{damage}}</h1>
 <ul ng-repeat="damage in damages">
   <li>Target ID: {{damage.targetId}}</li>
   <ul>
     <li>Damage: {{damage.damage}}</li>
   </ul>
-</ul>
+</ul>-->
 
-<h1>Action</h1>
+<!--<h1>Action</h1>
 <ul>
   <li>Source : {{action.source}}</li>
   <ul ng-repeat="target in action.targets track by $index">
     <li>Target ID: {{target}}</li>
   </ul>
-</ul>
+</ul>-->
 
-<h1>Commit</h1>
+<!--<h1>Commit</h1>
 <ul ng-repeat="commit in commits">
   <li>SHA: {{commit.sha}}</li>
   <li>Date: {{commit.date}}</li>
@@ -81,9 +138,9 @@
       <li>Previous committer: {{file.previousCommitter}}</li>
     </ul>
   </ul>
-</ul>
+</ul>-->
 
-<h1>Users</h1>
+<!--<h1>Users</h1>
 <ul ng-repeat="(key, user) in users">
   <li>ID: {{user.id}}</li>
   <ul>
@@ -92,4 +149,4 @@
     <li>Attack: {{user.attack}}</li>
     <li>Defense: {{user.defense}}</li>
   </ul>
-</ul>
+</ul>-->

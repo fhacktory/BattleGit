@@ -1,7 +1,7 @@
 'use strict';
 
-var w = 1280,
-  h = 800,
+var w = 600,
+  h = 600,
   rx = w / 2,
   ry = h / 2,
   m0,
@@ -113,30 +113,45 @@ angular.module('battleGitApp')
               var attackModifiers = [];
 
               // commit.date.
-              if (parseInt(commit.date.substring(11, 13)) <= 12) {
+              if (parseInt(commit.date.substring(11, 13)) <= 7) {
                 attackModifiers.push({
-                  rule: 'commit.date.substring(11, 13) <= 12',
+                  rule: 'commit.date.substring(11, 13) <= 7',
                   value: -10
                 });
               }
-              if (parseInt(commit.date.substring(11, 13)) >= 12) {
+              if (parseInt(commit.date.substring(11, 13)) >= 19) {
                 attackModifiers.push({
-                  rule: 'commit.date.substring(11, 13) >= 12',
+                  rule: 'commit.date.substring(11, 13) >= 19',
                   value: -10
                 });
               }
 
-              // commit.message.length.
-              if (commit.message.length < 100) {
+              // commit.files.length.
+              if (commit.files.length < 10) {
                 attackModifiers.push({
-                  rule: 'commit.message.length < 100',
+                  rule: 'commit.files.length > 10',
+                  value: -10
+                });
+              }
+              
+              // commit.message.length.
+              if (commit.message.length < 10) {
+                attackModifiers.push({
+                  rule: 'commit.message.length < 10',
+                  value: -10
+                });
+              }
+              if (commit.message.length > 50) {
+                attackModifiers.push({
+                  rule: 'commit.message.length < 50',
                   value: -10
                 });
               }
 
               // commit.message.contains.
               [
-                'added'
+                'add',
+                'improve'
               ].forEach(function (element) {
                 if (commit.message.toLowerCase().indexOf(element) > -1) {
                   attackModifiers.push({
@@ -147,6 +162,24 @@ angular.module('battleGitApp')
               });
 
               return attackModifiers;
+            },
+            processDefenseModifiers: function (commit) {
+              var defenseModifiers = [];
+              
+              [
+                'merge',
+                'fix',
+                'resolve'
+              ].forEach(function (element) {
+                if (commit.message.toLowerCase().indexOf(element) > -1) {
+                  defenseModifiers.push({
+                    rule: 'commit.message.contains("' + element + '")',
+                    value: 10
+                  });
+                }
+              });
+              
+              return defenseModifiers;
             },
             processAction: function (commit) {
               var action = {
@@ -200,12 +233,12 @@ angular.module('battleGitApp')
         .factory('displayService', function () {
           return {
             createBattlefield: function (bundle) {
-              var div = d3.select("div.ng-scope").insert("div", "form")
-                .style("top", "-80px")
-                .style("left", "-160px")
+              var div = d3.select("#d3").insert("div", "form")
+                .style("top", "0px")
+                .style("left", "0px")
                 .style("width", w + "px")
                 .style("height", w + "px")
-                //s.style("position", "absolute")
+                .style("position", "absolute")
                 .style("-webkit-backface-visibility", "hidden");
               var svg = div.append("svg:svg")
                 .attr("width", w)
@@ -345,13 +378,15 @@ angular.module('battleGitApp')
             $scope.repositoryId = 'angular/angular.js';
             $scope.since = '2014-01-01' + 'T00:00:00Z';
             $scope.until = '2014-10-11' + 'T24:00:00Z';
-            $scope.interval = 2000;
-            $scope.page = 0;
+            $scope.interval = 4000;
+            $scope.page = 1;
             $scope.perPage = 1;
             $scope.maxSteps = 10;
             $scope.baseLife = 100;
             $scope.baseAttack = 100;
             $scope.baseDefense = 100;
+            
+            $scope.panels = [];
 
             // Global initialization.
             $scope.users = {};
@@ -385,11 +420,10 @@ angular.module('battleGitApp')
             $scope.step = 0;
             $scope.run = function () {
               $interval(function () {
-                $scope.step++;
                 $scope.commits = [];
 
                 // This does not make sense, commit*s* should have been commit to simplify things.
-                retreiveService.retreiveCommits($scope.repositoryId, $scope.since, $scope.until, $scope.page + $scope.step, $scope.perPage, $scope.clientId, $scope.clientSecret).then(function (response) {
+                retreiveService.retreiveCommits($scope.repositoryId, $scope.since, $scope.until, $scope.page + $scope.step++, $scope.perPage, $scope.clientId, $scope.clientSecret).then(function (response) {
                   response.data.forEach(function (element) {
                     var commit = {
                       sha: element.sha,
@@ -433,15 +467,21 @@ angular.module('battleGitApp')
 
                           // Modifier: Initialization.
                           $scope.attackModifiers = processService.processAttackModifiers(commit);
+                          $scope.defenseModifiers = processService.processDefenseModifiers(commit);
 
                           // Modifier: Aggregation.
                           $scope.attackModifier = 0;
                           $scope.attackModifiers.forEach(function (element) {
                             $scope.attackModifier += element.value;
                           });
-
+                          $scope.defenseModifier = 0;
+                          $scope.defenseModifiers.forEach(function (element) {
+                            $scope.defenseModifier += element.value;
+                          });
+                          
                           // Modifier: Apply.
                           $scope.users[commit.committerId].attack += $scope.attackModifier;
+                          $scope.users[commit.committerId].defense += $scope.defenseModifier;
 
                           $scope.nodeRoot = displayService.createNodesFromUsers($scope.users);
 
@@ -457,7 +497,6 @@ angular.module('battleGitApp')
                           $scope.attaques = [];
                           $scope.attaques.push($scope.actions);
                           // console.log($scope.attaques);
-                          
 //                          $scope.attaques = [];
 //                          $scope.attaques.push(processService.generateAttaques($scope.nodeRoot.children));
 //                          console.log($scope.attaques);
@@ -471,6 +510,7 @@ angular.module('battleGitApp')
                               
                               $scope.damages.push({
                                 targetId: target.id,
+                                targetLogin: target.login,
                                 damage: damage
                               });
                             }
@@ -484,6 +524,22 @@ angular.module('battleGitApp')
                           displayService.displayNodes($scope.battlefield, $scope.cluster, $scope.nodeRoot);
                           displayService.estomperAttaques($scope.battlefield, $scope.bundle);
                           displayService.displayAttaques($scope.battlefield, $scope.bundle, $scope.line, $scope.attaques);
+                                                    
+                          // Panel.
+                          $scope.panels.unshift({
+                            commitSha: commit.sha,
+                            commitMessage: commit.message,
+                            committerLogin: commit.committerLogin,
+                            attackModifier: $scope.attackModifier,
+                            attackModifiers: $scope.attackModifiers,
+                            defenseModifier: $scope.defenseModifier,
+                            defenseModifiers: $scope.defenseModifiers,
+                            damage: $scope.damage,
+                            damages: $scope.damages,
+                            life: $scope.users[commit.committerId].life,
+                            attack: $scope.users[commit.committerId].attack,
+                            defense: $scope.users[commit.committerId].defense
+                          });
                         });
                       });
                     });
