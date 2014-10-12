@@ -45,11 +45,23 @@
 </form>
 </div>
 
+<div class="panel panel-default" ng-show="isOver">
+  <div class="panel-heading">
+    Winner: {{winner}}!
+  </div>
+</div>
+
+<div class="panel panel-default" ng-show="isRunning">
+  <div class="panel-heading" ng-repeat="panel in panels | limitTo:1">
+    Remaining users: {{panel.totalUsers - panel.downUsers}} / {{panel.totalUsers}}
+  </div>
+</div>
+
 <div ng-repeat="panel in panels">
   <div class="panel panel-default">
     <div class="panel-heading">
-      {{panel.committerLogin}}
-      <!--{{panel.commitMessage}}-->
+      {{panel.committerLogin}}:
+      <small>{{panel.commitMessage}}</small>
     </div>
     <div class="panel-body">
       <div class="btn-group btn-group-justified">
