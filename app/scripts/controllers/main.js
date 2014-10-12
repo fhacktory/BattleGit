@@ -198,9 +198,7 @@ angular.module('battleGitApp')
         })
         .factory('displayService', function () {
           return {
-            createBattlefield: function () {
-              var bundle = d3.layout.bundle();
-
+            createBattlefield: function (bundle) {
               var div = d3.select("div.ng-scope").insert("div", "form")
                 .style("top", "-80px")
                 .style("left", "-160px")
@@ -237,11 +235,9 @@ angular.module('battleGitApp')
               };
               return nodes[""];
             },
-            displayNodes: function(svg, nodes) {
+            displayNodes: function(svg, cluster, nodes) {
 
-                var cluster = d3.layout.cluster()
-                  .size([360, ry - 120])
-                  .sort(function(a, b) { return d3.ascending(a.key, b.key); });
+                
                 var tmp = cluster.nodes(nodes); //,
                 svg.selectAll("g.node")
                     .data(tmp.filter(function(n) { return !n.children; }))
@@ -280,21 +276,25 @@ angular.module('battleGitApp')
                 svg.select("#node-" + d[name].key).classed(name, value);
               };
             },
-            displayAttaques: function(svg, attaques) {
+            displayAttaques: function(svg, bundle, line, attaques) {
+              var actions = [];
               for (var index = 0; index < attaques.length; ++index) {
                 var actions = attaques[index];
                 if (actions && actions.length != 0) {
                   actions.forEach(function (action) {               
-                    var bundle = d3.layout.bundle();
-                    var splines = bundle(action);
-                    var path = svg.selectAll("path.link")
-                      .data(action)
-                      .enter().append("svg:path")
-                      .attr("class", function(d) { return "link source-" + d.source.key + " target-" + d.target.key; })
-                      .attr("d", function(d, i) { return line(splines[i]); });
+                    actions.push(action);
                   });
                 }
               }
+              if (actions.length > 0) {
+                var splines = bundle(actions);
+                var path = svg.selectAll("path.link")
+                        .data(actions)
+                        .enter().append("svg:path")
+                        .attr("class", function(d) { return "link source-" + d.source.key + " target-" + d.target.key; })
+                        .attr("d", function(d, i) { return line(splines[i]); });
+              }
+
             }
           };
         })
@@ -315,7 +315,16 @@ angular.module('battleGitApp')
             // Global initialization.
             $scope.users = {};
             $scope.nodes = [];
-            $scope.battlefield = displayService.createBattlefield();
+            $scope.bundle = d3.layout.bundle();
+            $scope.battlefield = displayService.createBattlefield($scope.bundle);
+            $scope.cluster = d3.layout.cluster()
+                  .size([360, ry - 120])
+                  .sort(function(a, b) { return d3.ascending(a.key, b.key); });
+            $scope.line = d3.svg.line.radial()
+              .interpolate("bundle")
+              .tension(.85)
+              .radius(function(d) { return d.y; })
+              .angle(function(d) { return d.x / 180 * Math.PI; });
             $scope.attaques = [];
 
             // Users initialization.
@@ -405,12 +414,12 @@ angular.module('battleGitApp')
                             
                           //  $scope.users[target.id].life -= $scope.damage;
                           //});
-                          displayService.displayNodes($scope.battlefield, $scope.nodeRoot);
+                          displayService.displayNodes($scope.battlefield, $scope.cluster, $scope.nodeRoot);
                           $scope.attaques.push($scope.action);
-                          displayService.displayAttaques($scope.battlefield, $scope.attaques);
                           if ($scope.attaques.length > 5) {
                             $scope.attaques.pop();
                           }
+                          displayService.displayAttaques($scope.battlefield, $scope.bundle, $scope.line, $scope.attaques);
                         });
                       });
                     });
