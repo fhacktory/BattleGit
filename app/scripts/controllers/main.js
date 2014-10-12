@@ -1,7 +1,7 @@
 'use strict';
 
-var w = 1280,
-  h = 800,
+var w = 600,
+  h = 600,
   rx = w / 2,
   ry = h / 2,
   m0,
@@ -201,12 +201,12 @@ angular.module('battleGitApp')
         .factory('displayService', function () {
           return {
             createBattlefield: function (bundle) {
-              var div = d3.select("div.ng-scope").insert("div", "form")
-                .style("top", "-80px")
-                .style("left", "-160px")
+              var div = d3.select("#d3").insert("div", "form")
+                .style("top", "0px")
+                .style("left", "0px")
                 .style("width", w + "px")
                 .style("height", w + "px")
-                //s.style("position", "absolute")
+                .style("position", "absolute")
                 .style("-webkit-backface-visibility", "hidden");
               var svg = div.append("svg:svg")
                 .attr("width", w)
@@ -249,25 +249,7 @@ angular.module('battleGitApp')
                     .attr("dy", ".31em")
                     .attr("text-anchor", function(d) { return d.x < 180 ? "start" : "end"; })
                     .attr("transform", function(d) { return d.x < 180 ? null : "rotate(180)"; })
-                    .text(function(d) { return d.key; })
-                    .on("mouseover", function mouseover(d) {
-                      svg.selectAll("path.link.target-" + d.key)
-                          .classed("target", true)
-                          .each(this.updateNodes(svg, "source", true));
-
-                      svg.selectAll("path.link.source-" + d.key)
-                          .classed("source", true)
-                          .each(this.updateNodes(svg, "target", true));
-                    })
-                    .on("mouseout", function mouseout(d) {
-                      svg.selectAll("path.link.source-" + d.key)
-                          .classed("source", false)
-                          .each(this.updateNodes(svg, "target", false));
-
-                      svg.selectAll("path.link.target-" + d.key)
-                          .classed("target", false)
-                          .each(this.updateNodes(svg, "source", false));
-                    });
+                    .text(function(d) { return d.key; });
             },
             updateNodes: function(svg, name, value) {
               return function(d) {
