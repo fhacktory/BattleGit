@@ -269,10 +269,24 @@ angular.module('battleGitApp')
               return nodes[""];
             },
             displayNodes: function(svg, cluster, nodes) {
-                var tmp = cluster.nodes(nodes);
-                svg.selectAll("g.node")
-                    .data(tmp.filter(function(n) { return !n.children; }))
-                  .enter().append("svg:g")
+                var nodesCluster = cluster.nodes(nodes);
+                var nodesSVG = svg.selectAll("g.node")
+                    .data(nodesCluster.filter(function(n) { return !n.children; })); // permet de ne pas afficher le node "root"
+                  
+                // 1. exit
+                var exitTransition = d3.transition().duration(750).each(function() {
+                  nodesSVG.exit().transition()
+                      .style("opacity", 0)
+                      .remove();
+                });
+                // 2. update
+                var updateTransition = exitTransition.transition().each(function() {
+                  nodesSVG.transition()
+                      .style("background", "orange");
+                });
+                // 3. enter
+                var enterTransition = updateTransition.transition().each(function() {
+                  nodesSVG.enter().append("svg:g")
                     .attr("class", "node")
                     .attr("id", function(d) { return "node-" + d.key; })
                     .attr("transform", function(d) { return "rotate(" + (d.x - 90) + ")translate(" + d.y + ")"; })
@@ -303,6 +317,7 @@ angular.module('battleGitApp')
                       //     .classed("target", false)
                       //     .each(this.updateNodes(svg, "source", false));
                     });
+                });
             },
             updateNodes: function(svg, name, value) {
               return function(d) {
@@ -332,7 +347,8 @@ angular.module('battleGitApp')
                     var attaque = {
                       id: id,
                       source: action.source,
-                      target: action.target
+                      target: action.target,
+                      step: 5 - index
                     };
                     if (!actions[id]) {
                       actions[id] = attaque;
@@ -358,14 +374,16 @@ angular.module('battleGitApp')
                 // 2. update
                 var updateTransition = exitTransition.transition().each(function() {
                   links.transition()
-                      .style("background", "orange");
+                      .style("background", "orange")
+                      .style("stroke-width", function(d) { return "" + d.step + "px"; });
                 });
                 // 3. enter
                 var enterTransition = updateTransition.transition().each(function() {
                   links.enter().append("svg:path")
                     .attr("id", function(d) { return d.id; })
                     .attr("class", function(d) { return "link source-" + d.source.key + " target-" + d.target.key; })
-                    .attr("d", function(d, i) { return line(splines[i]); });
+                    .attr("d", function(d, i) { return line(splines[i]); })
+                    .style("stroke-width", function(d) { return "" + d.step + "px"; });
                 });
               }
 
