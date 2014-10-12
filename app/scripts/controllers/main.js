@@ -301,6 +301,8 @@ angular.module('battleGitApp')
             $scope.baseLife = 100;
             $scope.baseAttack = 100;
             $scope.baseDefense = 100;
+            
+            $scope.panels = [];
 
             // Global initialization.
             $scope.users = {};
@@ -433,6 +435,16 @@ angular.module('battleGitApp')
                           
                           displayService.displayNodes($scope.battlefield, $scope.cluster, $scope.nodeRoot);
                           displayService.displayAttaques($scope.battlefield, $scope.bundle, $scope.line, $scope.attaques);
+                          
+                          // Panel.
+                          $scope.panels.unshift({
+                            commitMessage: commit.message,
+                            committerLogin: commit.committerLogin,
+                            attackModifier: $scope.attackModifier,
+                            attackModifiers: $scope.attackModifiers,
+                            damage: $scope.damage,
+                            damages: $scope.damages
+                          });
                         });
                       });
                     });

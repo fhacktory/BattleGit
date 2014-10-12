@@ -1,4 +1,4 @@
-<form>
+<!--<form>
   <fieldset>
     <label for="clientId">Client ID</label>
     <input ng-model="clientId" id="clientId" type="text" />
@@ -39,32 +39,54 @@
     <label for="baseDefense">Base Defense</label>
     <input ng-model="baseDefense" id="baseDefense" type="text" />
   </fieldset>
-</form>
+</form>-->
 
 <button ng-click="run()">Run</button>
 
-<h1>Attack modifier: {{attackModifier}}</h1>
+<div ng-repeat="panel in panels">
+  <div class="panel panel-default">
+    <div class="panel-heading">
+      {{panel.committerLogin}}
+    </div>
+    <div class="panel-body">
+      <strong>Attack modifier: {{panel.attackModifier}}</strong>
+      <ul ng-repeat="attackModifier in panel.attackModifiers">
+        <li>{{attackModifier.rule}} : {{attackModifier.value}}</li>
+      </ul>
+      
+      <strong>Damages: {{panel.damage}}</strong>
+<!--      <ul ng-repeat="damage in panel.damages">
+        <li>Target ID: {{damage.targetId}}</li>
+        <ul>
+          <li>Damage: {{damage.damage}}</li>
+        </ul>
+      </ul>-->
+    </div>
+  </div>
+</div>
+
+<!--<h1>Attack modifier: {{attackModifier}}</h1>
 <ul ng-repeat="attackModifier in attackModifiers">
   <li>{{attackModifier.rule}} : {{attackModifier.value}}</li>
-</ul>
+</ul>-->
 
-<h1>Damages: {{damage}}</h1>
+<!--<h1>Damages: {{damage}}</h1>
 <ul ng-repeat="damage in damages">
   <li>Target ID: {{damage.targetId}}</li>
   <ul>
     <li>Damage: {{damage.damage}}</li>
   </ul>
-</ul>
+</ul>-->
 
-<h1>Action</h1>
+<!--<h1>Action</h1>
 <ul>
   <li>Source : {{action.source}}</li>
   <ul ng-repeat="target in action.targets track by $index">
     <li>Target ID: {{target}}</li>
   </ul>
-</ul>
+</ul>-->
 
-<h1>Commit</h1>
+<!--<h1>Commit</h1>
 <ul ng-repeat="commit in commits">
   <li>SHA: {{commit.sha}}</li>
   <li>Date: {{commit.date}}</li>
@@ -81,9 +103,9 @@
       <li>Previous committer: {{file.previousCommitter}}</li>
     </ul>
   </ul>
-</ul>
+</ul>-->
 
-<h1>Users</h1>
+<!--<h1>Users</h1>
 <ul ng-repeat="(key, user) in users">
   <li>ID: {{user.id}}</li>
   <ul>
@@ -92,4 +114,4 @@
     <li>Attack: {{user.attack}}</li>
     <li>Defense: {{user.defense}}</li>
   </ul>
-</ul>
+</ul>-->
