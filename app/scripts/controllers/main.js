@@ -158,7 +158,9 @@ angular.module('battleGitApp')
               action.source = commit.committerId;
 
               commit.files.forEach(function (file) {
-                action.targets.push(file.previousCommitter.id);
+                if (!action.targets.hasOwnProperty(file.previousCommitter.id)) {
+                  action.targets.push(file.previousCommitter.id);
+                }
               });
 
               return action;
@@ -200,7 +202,7 @@ angular.module('battleGitApp')
                 return node;
               }
               
-              console.log(users);
+//              console.log(users);
               for (var key in users) {
                 var user = users[key];
                 find(user.login, user);
@@ -346,7 +348,7 @@ angular.module('battleGitApp')
                           $scope.action = processService.processAction(commit);
 
                           // Action: Apply.
-                          console.log($scope.action);
+//                          console.log($scope.action);
                           $scope.action.targets.forEach(function (target) {
                             $scope.damage = Math.max(0, $scope.users[commit.committerId].attack - $scope.users[target].defense);
 //                            console.log($scope.damage);

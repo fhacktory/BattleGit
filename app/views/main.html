@@ -51,7 +51,7 @@
 <h1>Action</h1>
 <ul>
   <li>Source : {{action.source}}</li>
-  <ul ng-repeat="target in action.targets">
+  <ul ng-repeat="target in action.targets track by $index">
     <li>Target ID: {{target}}</li>
   </ul>
 </ul>
