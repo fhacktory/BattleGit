@@ -411,8 +411,8 @@ angular.module('battleGitApp')
             $scope.perPage = 1;
             $scope.maxSteps = 100;
             $scope.baseLife = 100;
-            $scope.baseAttack = 100;
-            $scope.baseDefense = 100;
+            $scope.baseAttack = 50;
+            $scope.baseDefense = 50;
             
             $scope.panels = [];
 
@@ -516,8 +516,8 @@ angular.module('battleGitApp')
                           });
                           
                           // Modifier: Apply.
-                          $scope.users[commit.committerId].attack += $scope.attackModifier;
-                          $scope.users[commit.committerId].defense += $scope.defenseModifier;
+                          $scope.users[commit.committerId].attack = Math.max(10, $scope.users[commit.committerId].attack + $scope.attackModifier);
+                          $scope.users[commit.committerId].defense = Math.max(10, $scope.users[commit.committerId].defense + $scope.defenseModifier);
 
                           $scope.nodeRoot = displayService.createNodesFromUsers($scope.users);
 
@@ -603,7 +603,7 @@ angular.module('battleGitApp')
                           });
                           
                           console.log(Object.keys($scope.downUsers).length);
-                          if (Object.keys($scope.downUsers).length === 1) {
+                          if (Object.keys($scope.downUsers).length === Object.keys($scope.users).length - 1) {
                             $scope.isRunning = false;
                             $scope.isOver = true;
                             
