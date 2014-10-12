@@ -261,7 +261,13 @@ angular.module('battleGitApp')
                           $scope.action = processService.processAction(commit);
 
                           // Action: Apply.
-//                          console.log($scope.action);
+                          console.log($scope.action);
+                          $scope.action.targets.forEach(function (target) {
+                            $scope.damage = Math.max(0, $scope.users[commit.committerId].attack - $scope.users[target].defense);
+                            console.log($scope.damage);
+                            
+                            $scope.users[target].life -= $scope.damage;
+                          });
                           
                           var nodes = displayService.createNodesFromUsers($scope.users);
                           displayService.displayNodes($scope.battlefield, nodes);
