@@ -45,7 +45,6 @@ function mouseup() {
   }
 }
 
-
 function cross(a, b) {
   return a[0] * b[1] - a[1] * b[0];
 }
@@ -249,24 +248,27 @@ angular.module('battleGitApp')
                     .attr("dy", ".31em")
                     .attr("text-anchor", function(d) { return d.x < 180 ? "start" : "end"; })
                     .attr("transform", function(d) { return d.x < 180 ? null : "rotate(180)"; })
+                    .attr("font-size", function(d) { return "" + ((d.life / 5) + 10) + "px"; })
                     .text(function(d) { return d.key; })
                     .on("mouseover", function mouseover(d) {
-                      svg.selectAll("path.link.target-" + d.key)
-                          .classed("target", true)
-                          .each(this.updateNodes(svg, "source", true));
+                      d3.event.preventDefault();
+                      // svg.selectAll("path.link.target-" + d.key)
+                      //     .classed("target", true)
+                      //     .each(this.updateNodes(svg, "source", true));
 
-                      svg.selectAll("path.link.source-" + d.key)
-                          .classed("source", true)
-                          .each(this.updateNodes(svg, "target", true));
+                      // svg.selectAll("path.link.source-" + d.key)
+                      //     .classed("source", true)
+                      //     .each(this.updateNodes(svg, "target", true));
                     })
                     .on("mouseout", function mouseout(d) {
-                      svg.selectAll("path.link.source-" + d.key)
-                          .classed("source", false)
-                          .each(this.updateNodes(svg, "target", false));
+                      d3.event.preventDefault();
+                      // svg.selectAll("path.link.source-" + d.key)
+                      //     .classed("source", false)
+                      //     .each(this.updateNodes(svg, "target", false));
 
-                      svg.selectAll("path.link.target-" + d.key)
-                          .classed("target", false)
-                          .each(this.updateNodes(svg, "source", false));
+                      // svg.selectAll("path.link.target-" + d.key)
+                      //     .classed("target", false)
+                      //     .each(this.updateNodes(svg, "source", false));
                     });
             },
             updateNodes: function(svg, name, value) {
@@ -284,23 +286,54 @@ angular.module('battleGitApp')
               });
               return node;
             },
+            estomperAttaques: function(svg, bundle) {
+
+            },
             displayAttaques: function(svg, bundle, line, attaques) {
-              var actions = [];
+              var actions = {};
               for (var index = 0; index < attaques.length; ++index) {
-                var actions = attaques[index];
-                if (actions && actions.length !== 0) {
-                  actions.forEach(function (action) {               
-                    actions.push(action);
+                var actionsStep = attaques[index];
+                if (actionsStep && actionsStep.length !== 0) {
+                  actionsStep.forEach(function (action) {
+                    var id = "path-" + action.source.key + "-" + action.target.key;
+                    var attaque = {
+                      id: id,
+                      source: action.source,
+                      target: action.target
+                    };
+                    if (!actions[id]) {
+                      actions[id] = attaque;
+                    }
                   });
                 }
               }
-              if (actions.length > 0) {
-                var splines = bundle(actions);
-                var path = svg.selectAll("path.link")
-                        .data(actions)
-                        .enter().append("svg:path")
-                        .attr("class", function(d) { return "link source-" + d.source.key + " target-" + d.target.key; })
-                        .attr("d", function(d, i) { return line(splines[i]); });
+              if (Object.keys(actions).length > 0) {
+                var values = [];
+                for (var k in actions) {
+                  var value = actions[k];
+                  values.push(value);
+                }
+                var splines = bundle(values);
+                var links = svg.selectAll("path.link")
+                        .data(values);
+                // 1. exit
+                var exitTransition = d3.transition().duration(750).each(function() {
+                  links.exit().transition()
+                      .style("opacity", 0)
+                      .remove();
+                });
+                // 2. update
+                var updateTransition = exitTransition.transition().each(function() {
+                  links.transition()
+                      .style("background", "orange");
+                });
+                // 3. enter
+                var enterTransition = updateTransition.transition().each(function() {
+                  links.enter().append("svg:path")
+                    .attr("id", function(d) { return d.id; })
+                    .attr("class", function(d) { return "link source-" + d.source.key + " target-" + d.target.key; })
+                    .attr("d", function(d, i) { return line(splines[i]); });
+                });
               }
 
             }
@@ -423,7 +456,7 @@ angular.module('battleGitApp')
                           });
                           $scope.attaques = [];
                           $scope.attaques.push($scope.actions);
-                          console.log($scope.attaques);
+                          // console.log($scope.attaques);
                           
 //                          $scope.attaques = [];
 //                          $scope.attaques.push(processService.generateAttaques($scope.nodeRoot.children));
@@ -448,8 +481,8 @@ angular.module('battleGitApp')
                           $scope.damages.forEach(function (element) {
                             $scope.damage += element.damage;
                           });
-                          
                           displayService.displayNodes($scope.battlefield, $scope.cluster, $scope.nodeRoot);
+                          displayService.estomperAttaques($scope.battlefield, $scope.bundle);
                           displayService.displayAttaques($scope.battlefield, $scope.bundle, $scope.line, $scope.attaques);
                         });
                       });
