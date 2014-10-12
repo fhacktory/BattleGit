@@ -72,7 +72,7 @@ angular.module('battleGitApp')
               [
                 'added'
               ].forEach(function (element) {
-                if (commit.message.toLowerCase().contains(element)) {
+                if (commit.message.toLowerCase().indexOf(element) > -1) {
                   attackModifiers.push({
                     rule: 'commit.message.contains("' + element + '")',
                     value: 10
@@ -161,8 +161,24 @@ angular.module('battleGitApp')
                     .attr("text-anchor", function(d) { return d.x < 180 ? "start" : "end"; })
                     .attr("transform", function(d) { return d.x < 180 ? null : "rotate(180)"; })
                     .text(function(d) { return d.key; })
-                    .on("mouseover", mouseover)
-                    .on("mouseout", mouseout);
+                    .on("mouseover", function mouseover(d) {
+                      svg.selectAll("path.link.target-" + d.key)
+                          .classed("target", true)
+                          .each(updateNodes("source", true));
+
+                      svg.selectAll("path.link.source-" + d.key)
+                          .classed("source", true)
+                          .each(updateNodes("target", true));
+                    })
+                    .on("mouseout", function mouseout(d) {
+                      svg.selectAll("path.link.source-" + d.key)
+                          .classed("source", false)
+                          .each(updateNodes("target", false));
+
+                      svg.selectAll("path.link.target-" + d.key)
+                          .classed("target", false)
+                          .each(updateNodes("source", false));
+                    });
             }
           };
         })
@@ -267,8 +283,8 @@ angular.module('battleGitApp')
                             $scope.users[target].life -= $scope.damage;
                           });
                           
-                          //var nodes = displayService.createNodesFromUsers($scope.users);
-                          //displayService.displayNodes($scope.battlefield, nodes);
+                          var nodes = displayService.createNodesFromUsers($scope.users);
+                          displayService.displayNodes($scope.battlefield, nodes);
                         });
                       });
                     });
