@@ -1,5 +1,72 @@
 'use strict';
 
+var w = 1280,
+  h = 800,
+  rx = w / 2,
+  ry = h / 2,
+  m0,
+  rotate = 0;
+
+function mouse(e) {
+  return [e.pageX - rx, e.pageY - ry];
+}
+
+function mousedown() {
+  m0 = mouse(d3.event);
+  d3.event.preventDefault();
+}
+
+function mousemove() {
+  if (m0) {
+    var m1 = mouse(d3.event),
+        dm = Math.atan2(cross(m0, m1), dot(m0, m1)) * 180 / Math.PI;
+    div.style("-webkit-transform", "translateY(" + (ry - rx) + "px)rotateZ(" + dm + "deg)translateY(" + (rx - ry) + "px)");
+  }
+}
+
+function mouseup() {
+  if (m0) {
+    var m1 = mouse(d3.event),
+        dm = Math.atan2(cross(m0, m1), dot(m0, m1)) * 180 / Math.PI;
+
+    rotate += dm;
+    if (rotate > 360) rotate -= 360;
+    else if (rotate < 0) rotate += 360;
+    m0 = null;
+
+    div.style("-webkit-transform", null);
+
+    $scope.battlefield
+        .attr("transform", "translate(" + rx + "," + ry + ")rotate(" + rotate + ")")
+      .selectAll("g.node text")
+        .attr("dx", function(d) { return (d.x + rotate) % 360 < 180 ? 8 : -8; })
+        .attr("text-anchor", function(d) { return (d.x + rotate) % 360 < 180 ? "start" : "end"; })
+        .attr("transform", function(d) { return (d.x + rotate) % 360 < 180 ? null : "rotate(180)"; });
+  }
+}
+
+
+function cross(a, b) {
+  return a[0] * b[1] - a[1] * b[0];
+}
+
+function dot(a, b) {
+  return a[0] * b[0] + a[1] * b[1];
+}
+
+function newAttaque() {
+  var attaques = git.generateAttaques(gitCommiters);
+
+  if (attaques.length > 0) {
+    var splines = bundle(attaques);
+    var path = svg.selectAll("path.link")
+      .data(attaques)
+      .enter().append("svg:path")
+      .attr("class", function(d) { return "link source-" + d.source.key + " target-" + d.target.key; })
+      .attr("d", function(d, i) { return line(splines[i]); });
+  }
+}
+
 angular.module('battleGitApp')
         .factory('retreiveService', function ($http) {
           return {
@@ -101,16 +168,6 @@ angular.module('battleGitApp')
         .factory('displayService', function () {
           return {
             createBattlefield: function () {
-              var w = 1280,
-                h = 800,
-                rx = w / 2,
-                ry = h / 2,
-                m0,
-                rotate = 0;
-              var cluster = d3.layout.cluster()
-                .size([360, ry - 120])
-                .sort(function(a, b) { return d3.ascending(a.key, b.key); });
-
               var bundle = d3.layout.bundle();
 
               var div = d3.select("div.ng-scope").insert("div", "form")
@@ -150,7 +207,11 @@ angular.module('battleGitApp')
               };
               return nodes[""];
             },
-            displayNodes: function (svg, nodes) {
+            displayNodes: function(svg, nodes) {
+
+                var cluster = d3.layout.cluster()
+                  .size([360, ry - 120])
+                  .sort(function(a, b) { return d3.ascending(a.key, b.key); });
                 var tmp = cluster.nodes(nodes); //,
                 svg.selectAll("g.node")
                     .data(tmp.filter(function(n) { return !n.children; }))
@@ -176,13 +237,20 @@ angular.module('battleGitApp')
                     .on("mouseout", function mouseout(d) {
                       svg.selectAll("path.link.source-" + d.key)
                           .classed("source", false)
-                          .each(updateNodes("target", false));
+                          .each(this.updateNodes("target", false));
 
                       svg.selectAll("path.link.target-" + d.key)
                           .classed("target", false)
-                          .each(updateNodes("source", false));
+                          .each(this.updateNodes("source", false));
                     });
+            },
+            updateNodes: function(name, value) {
+              return function(d) {
+                if (value) this.parentNode.appendChild(this);
+                $scope.battlefield.select("#node-" + d[name].key).classed(name, value);
+              };
             }
+
           };
         })
         .controller('MainCtrl', ['$scope', '$interval', 'displayService', 'retreiveService', 'processService', function ($scope, $interval, displayService, retreiveService, processService) {
