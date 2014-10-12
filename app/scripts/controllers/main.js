@@ -373,6 +373,9 @@ angular.module('battleGitApp')
           };
         })
         .controller('MainCtrl', ['$scope', '$interval', 'displayService', 'retreiveService', 'processService', function ($scope, $interval, displayService, retreiveService, processService) {
+            $scope.isRunning = false;
+            $scope.isOver = false;
+            
             $scope.clientId = '3bb9d435e94403d10de1';
             $scope.clientSecret = 'eeeb700e0f2e679851fece64b0b84fba8fa35afd';
             $scope.repositoryId = 'fhacktory/BattleGit';
@@ -382,7 +385,7 @@ angular.module('battleGitApp')
             $scope.page = 1;
             $scope.perPage = 1;
             $scope.maxSteps = 10;
-            $scope.baseLife = 100;
+            $scope.baseLife = 500;
             $scope.baseAttack = 100;
             $scope.baseDefense = 100;
             
@@ -390,6 +393,8 @@ angular.module('battleGitApp')
 
             // Global initialization.
             $scope.users = {};
+            $scope.downUsers = {};
+            
             $scope.nodes = [];
             $scope.bundle = d3.layout.bundle();
             $scope.battlefield = displayService.createBattlefield($scope.bundle);
@@ -406,6 +411,8 @@ angular.module('battleGitApp')
             // Main loop.
             $scope.step = 0;
             $scope.run = function () {
+              $scope.isRunning = true;
+              
               // Users initialization.
               retreiveService.retreiveContributors($scope.repositoryId, $scope.clientId, $scope.clientSecret).then(function (response) {
                 response.data.forEach(function (element) {
@@ -420,6 +427,10 @@ angular.module('battleGitApp')
               });
               
               $interval(function () {
+                if ($scope.isOver) {
+                  return;
+                }
+                
                 $scope.commits = [];
 
                 // This does not make sense, commit*s* should have been commit to simplify things.
@@ -524,6 +535,17 @@ angular.module('battleGitApp')
                                 targetLogin: target.login,
                                 damage: damage
                               });
+                              
+                              if ($scope.users[target.id].life <= 0) {
+                                if (!$scope.downUsers.hasOwnProperty(target.id)) {
+                                  $scope.downUsers[target.id] = {
+                                    id: target.id,
+                                    login: target.login
+                                  };
+                                  console.log($scope.users[target.id].life);
+                                  console.log($scope.downUsers);
+                                }
+                              }
                             }
                           });
                           
@@ -549,8 +571,25 @@ angular.module('battleGitApp')
                             damages: $scope.damages,
                             life: $scope.users[commit.committerId].life,
                             attack: $scope.users[commit.committerId].attack,
-                            defense: $scope.users[commit.committerId].defense
+                            defense: $scope.users[commit.committerId].defense,
+                            
+                            totalUsers: Object.keys($scope.users).length,
+                            downUsers: Object.keys($scope.downUsers).length
                           });
+                          
+                          console.log(Object.keys($scope.downUsers).length);
+                          if (Object.keys($scope.downUsers).length === 1) {
+                            $scope.isRunning = false;
+                            $scope.isOver = true;
+                            
+                            for (var key in $scope.users) {
+                              var user = $scope.users[key];
+                              
+                              if (!$scope.downUsers.hasOwnProperty(key)) {
+                                $scope.winner = user.login;
+                              }
+                            };
+                          }
                         });
                       });
                     });
