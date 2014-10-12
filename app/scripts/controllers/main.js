@@ -282,7 +282,14 @@ angular.module('battleGitApp')
                 // 2. update
                 var updateTransition = exitTransition.transition().each(function() {
                   var nodeUpdates = nodesSVG.transition();
-                  nodeUpdates.select("text").attr("font-size", function(d) { return "" + ((d.life / 5) + 10) + "px"; });
+                  nodeUpdates.select("text")
+                    .attr("font-size", function(d) { return "" + ((d.life / 5) + 10) + "px"; })
+                    .style("fill", function(d) {
+                      var r = Math.floor((255 * (100 - d.life)) / 100),
+                          g = Math.floor((255 * d.life) / 100),
+                          b = 0;
+                      return "rgb(" + r + "," + g + "," + b + ")";
+                    });
                 });
                 // 3. enter
                 var enterTransition = updateTransition.transition().each(function() {
