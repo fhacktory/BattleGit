@@ -281,8 +281,8 @@ angular.module('battleGitApp')
                 });
                 // 2. update
                 var updateTransition = exitTransition.transition().each(function() {
-                  nodesSVG.transition()
-                      .style("background", "orange");
+                  var nodeUpdates = nodesSVG.transition();
+                  nodeUpdates.select("text").attr("font-size", function(d) { return "" + ((d.life / 5) + 10) + "px"; });
                 });
                 // 3. enter
                 var enterTransition = updateTransition.transition().each(function() {
@@ -393,7 +393,7 @@ angular.module('battleGitApp')
         .controller('MainCtrl', ['$scope', '$interval', 'displayService', 'retreiveService', 'processService', function ($scope, $interval, displayService, retreiveService, processService) {
             $scope.clientId = '3bb9d435e94403d10de1';
             $scope.clientSecret = 'eeeb700e0f2e679851fece64b0b84fba8fa35afd';
-            $scope.repositoryId = 'fhacktory/BattleGit';
+            $scope.repositoryId = 'angular/angular.js';
             $scope.since = '2014-01-01' + 'T00:00:00Z';
             $scope.until = '2014-10-11' + 'T24:00:00Z';
             $scope.interval = 4000;
