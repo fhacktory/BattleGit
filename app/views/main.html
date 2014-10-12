@@ -47,6 +47,7 @@
   <div class="panel panel-default">
     <div class="panel-heading">
       {{panel.committerLogin}}
+      <!--{{panel.commitMessage}}-->
     </div>
     <div class="panel-body">
       <strong>Attack modifier: {{panel.attackModifier}}</strong>
@@ -55,12 +56,12 @@
       </ul>
       
       <strong>Damages: {{panel.damage}}</strong>
-<!--      <ul ng-repeat="damage in panel.damages">
+      <ul ng-repeat="damage in panel.damages">
         <li>Target ID: {{damage.targetId}}</li>
         <ul>
           <li>Damage: {{damage.damage}}</li>
         </ul>
-      </ul>-->
+      </ul>
     </div>
   </div>
 </div>

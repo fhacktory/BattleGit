@@ -114,30 +114,47 @@ angular.module('battleGitApp')
               var attackModifiers = [];
 
               // commit.date.
-              if (parseInt(commit.date.substring(11, 13)) <= 12) {
+              if (parseInt(commit.date.substring(11, 13)) <= 7) {
                 attackModifiers.push({
-                  rule: 'commit.date.substring(11, 13) <= 12',
+                  rule: 'commit.date.substring(11, 13) <= 7',
                   value: -10
                 });
               }
-              if (parseInt(commit.date.substring(11, 13)) >= 12) {
+              if (parseInt(commit.date.substring(11, 13)) >= 19) {
                 attackModifiers.push({
-                  rule: 'commit.date.substring(11, 13) >= 12',
+                  rule: 'commit.date.substring(11, 13) >= 19',
                   value: -10
                 });
               }
 
-              // commit.message.length.
-              if (commit.message.length < 100) {
+              // commit.files.length.
+              if (commit.files.length < 10) {
                 attackModifiers.push({
-                  rule: 'commit.message.length < 100',
+                  rule: 'commit.files.length > 10',
+                  value: -10
+                });
+              }
+              
+              // commit.message.length.
+              if (commit.message.length < 10) {
+                attackModifiers.push({
+                  rule: 'commit.message.length < 10',
+                  value: -10
+                });
+              }
+              if (commit.message.length > 50) {
+                attackModifiers.push({
+                  rule: 'commit.message.length < 50',
                   value: -10
                 });
               }
 
               // commit.message.contains.
               [
-                'added'
+                'add',
+                'fix',
+                'resolve',
+                'improve'
               ].forEach(function (element) {
                 if (commit.message.toLowerCase().indexOf(element) > -1) {
                   attackModifiers.push({
@@ -294,8 +311,8 @@ angular.module('battleGitApp')
             $scope.repositoryId = 'angular/angular.js';
             $scope.since = '2014-01-01' + 'T00:00:00Z';
             $scope.until = '2014-10-11' + 'T24:00:00Z';
-            $scope.interval = 2000;
-            $scope.page = 0;
+            $scope.interval = 4000;
+            $scope.page = 1;
             $scope.perPage = 1;
             $scope.maxSteps = 10;
             $scope.baseLife = 100;
@@ -336,11 +353,10 @@ angular.module('battleGitApp')
             $scope.step = 0;
             $scope.run = function () {
               $interval(function () {
-                $scope.step++;
                 $scope.commits = [];
 
                 // This does not make sense, commit*s* should have been commit to simplify things.
-                retreiveService.retreiveCommits($scope.repositoryId, $scope.since, $scope.until, $scope.page + $scope.step, $scope.perPage, $scope.clientId, $scope.clientSecret).then(function (response) {
+                retreiveService.retreiveCommits($scope.repositoryId, $scope.since, $scope.until, $scope.page + $scope.step++, $scope.perPage, $scope.clientId, $scope.clientSecret).then(function (response) {
                   response.data.forEach(function (element) {
                     var commit = {
                       sha: element.sha,
@@ -407,7 +423,7 @@ angular.module('battleGitApp')
                           });
                           $scope.attaques = [];
                           $scope.attaques.push($scope.actions);
-                          console.log($scope.attaques);
+//                          console.log($scope.attaques);
                           
 //                          $scope.attaques = [];
 //                          $scope.attaques.push(processService.generateAttaques($scope.nodeRoot.children));
@@ -435,9 +451,10 @@ angular.module('battleGitApp')
                           
                           displayService.displayNodes($scope.battlefield, $scope.cluster, $scope.nodeRoot);
                           displayService.displayAttaques($scope.battlefield, $scope.bundle, $scope.line, $scope.attaques);
-                          
+                                                    
                           // Panel.
                           $scope.panels.unshift({
+                            commitSha: commit.sha,
                             commitMessage: commit.message,
                             committerLogin: commit.committerLogin,
                             attackModifier: $scope.attackModifier,
