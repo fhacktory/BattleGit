@@ -375,7 +375,7 @@ angular.module('battleGitApp')
         .controller('MainCtrl', ['$scope', '$interval', 'displayService', 'retreiveService', 'processService', function ($scope, $interval, displayService, retreiveService, processService) {
             $scope.clientId = '3bb9d435e94403d10de1';
             $scope.clientSecret = 'eeeb700e0f2e679851fece64b0b84fba8fa35afd';
-            $scope.repositoryId = 'angular/angular.js';
+            $scope.repositoryId = 'fhacktory/BattleGit';
             $scope.since = '2014-01-01' + 'T00:00:00Z';
             $scope.until = '2014-10-11' + 'T24:00:00Z';
             $scope.interval = 4000;
@@ -403,22 +403,22 @@ angular.module('battleGitApp')
               .angle(function(d) { return d.x / 180 * Math.PI; });
             $scope.attaques = [];
 
-            // Users initialization.
-            retreiveService.retreiveContributors($scope.repositoryId, $scope.clientId, $scope.clientSecret).then(function (response) {
-              response.data.forEach(function (element) {
-                $scope.users[element.id] = {
-                  login: element.login,
-                  id: element.id,
-                  life: $scope.baseLife,
-                  attack: $scope.baseAttack,
-                  defense: $scope.baseDefense
-                };
-              });
-            });
-
             // Main loop.
             $scope.step = 0;
             $scope.run = function () {
+              // Users initialization.
+              retreiveService.retreiveContributors($scope.repositoryId, $scope.clientId, $scope.clientSecret).then(function (response) {
+                response.data.forEach(function (element) {
+                  $scope.users[element.id] = {
+                    login: element.login,
+                    id: element.id,
+                    life: $scope.baseLife,
+                    attack: $scope.baseAttack,
+                    defense: $scope.baseDefense
+                  };
+                });
+              });
+              
               $interval(function () {
                 $scope.commits = [];
 
@@ -505,6 +505,17 @@ angular.module('battleGitApp')
                           $scope.damages = [];
                           $scope.action.targets.forEach(function (target) {
                             if (target.id !== commit.committerId) {
+                              // Add the current user if it has not been detected until now.
+                              if (!$scope.users.hasOwnProperty(target.id)) {
+                                $scope.users[target.id] = {
+                                  login: target.login,
+                                  id: target,
+                                  life: $scope.baseLife,
+                                  attack: $scope.baseAttack,
+                                  defense: $scope.baseDefense
+                                };
+                              }
+                              
                               var damage = Math.max(0, $scope.users[commit.committerId].attack - $scope.users[target.id].defense / 10);
                               $scope.users[target.id].life -= damage;
                               
