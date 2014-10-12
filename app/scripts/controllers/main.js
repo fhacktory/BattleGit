@@ -430,10 +430,24 @@ angular.module('battleGitApp')
 //                          console.log($scope.attaques);
                           
                           // Action: Apply.
-                          //$scope.action.targets.forEach(function (target) {                            
-                          //  $scope.damage = Math.max(0, $scope.users[commit.committerId].attack - $scope.users[target.id].defense);
-                          //  $scope.users[target.id].life -= $scope.damage;
-                          //});
+                          $scope.damages = [];
+                          $scope.action.targets.forEach(function (target) {
+                            if (target.id !== commit.committerId) {
+                              var damage = Math.max(0, $scope.users[commit.committerId].attack - $scope.users[target.id].defense / 10);
+                              $scope.users[target.id].life -= damage;
+                              
+                              $scope.damages.push({
+                                targetId: target.id,
+                                damage: damage
+                              });
+                            }
+                          });
+                          
+                          // Damage: Aggregation.
+                          $scope.damage = 0;
+                          $scope.damages.forEach(function (element) {
+                            $scope.damage += element.damage;
+                          });
                           
                           displayService.displayNodes($scope.battlefield, $scope.cluster, $scope.nodeRoot);
                           displayService.displayAttaques($scope.battlefield, $scope.bundle, $scope.line, $scope.attaques);

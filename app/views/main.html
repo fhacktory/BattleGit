@@ -48,6 +48,14 @@
   <li>{{attackModifier.rule}} : {{attackModifier.value}}</li>
 </ul>
 
+<h1>Damages: {{damage}}</h1>
+<ul ng-repeat="damage in damages">
+  <li>Target ID: {{damage.targetId}}</li>
+  <ul>
+    <li>Damage: {{damage.damage}}</li>
+  </ul>
+</ul>
+
 <h1>Action</h1>
 <ul>
   <li>Source : {{action.source}}</li>
