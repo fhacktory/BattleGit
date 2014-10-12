@@ -130,9 +130,9 @@ angular.module('battleGitApp')
             createNodesFromUsers: function (users) {
               var nodes = {};
               function find(name, data) {
-                var node = map[name];
+                var node = nodes[name];
                 if (!node) {
-                  node = map[name] = data || {name: name, children: []};
+                  node = nodes[name] = data || {name: name, children: []};
                   if (name.length) {
                     node.parent = find("");
                     node.parent.children.push(node);
@@ -141,12 +141,10 @@ angular.module('battleGitApp')
                   }
                 }
                 return node;
-              }
-              
+              }              
               for (var user in users) {
                 find(user.login, user);
               };
-
               return nodes[""];
             },
             displayNodes: function (svg, nodes) {
@@ -269,8 +267,8 @@ angular.module('battleGitApp')
                             $scope.users[target].life -= $scope.damage;
                           });
                           
-                          var nodes = displayService.createNodesFromUsers($scope.users);
-                          displayService.displayNodes($scope.battlefield, nodes);
+                          //var nodes = displayService.createNodesFromUsers($scope.users);
+                          //displayService.displayNodes($scope.battlefield, nodes);
                         });
                       });
                     });
