@@ -167,6 +167,32 @@ angular.module('battleGitApp')
               });
 
               return action;
+            },
+            generateAttaques: function (nodes) {
+              var attaques = [];
+              var attaqueCount = this.getRandomInt(0, 1);
+              while (attaqueCount > 0) {
+                var source = nodes[this.getRandomInt(1, nodes.length)];
+                var isMultipleAttaque = this.getRandomInt(0, 5);
+                if (isMultipleAttaque == 0) {
+                  nodes.forEach(function(target) {
+                    if (source != target) {
+                      var attaque = {source: source, target: target};
+                      attaques.push(attaque);
+                    }
+                  });
+                } else {
+                  var target = nodes[this.getRandomInt(1, nodes.length)];
+                  if (source != target) {
+                    attaques.push({source: source, target: target});
+                  }
+                }
+                attaqueCount--;
+              }
+              return attaques;
+            },
+            getRandomInt: function(min, max) {
+              return Math.floor(Math.random() * (max - min + 1) + min);
             }
           };
         })
@@ -232,39 +258,41 @@ angular.module('battleGitApp')
                     .on("mouseover", function mouseover(d) {
                       svg.selectAll("path.link.target-" + d.key)
                           .classed("target", true)
-                          .each(updateNodes("source", true));
+                          .each(this.updateNodes(svg, "source", true));
 
                       svg.selectAll("path.link.source-" + d.key)
                           .classed("source", true)
-                          .each(updateNodes("target", true));
+                          .each(this.updateNodes(svg, "target", true));
                     })
                     .on("mouseout", function mouseout(d) {
                       svg.selectAll("path.link.source-" + d.key)
                           .classed("source", false)
-                          .each(this.updateNodes("target", false));
+                          .each(this.updateNodes(svg, "target", false));
 
                       svg.selectAll("path.link.target-" + d.key)
                           .classed("target", false)
-                          .each(this.updateNodes("source", false));
+                          .each(this.updateNodes(svg, "source", false));
                     });
             },
-            updateNodes: function(name, value) {
+            updateNodes: function(svg, name, value) {
               return function(d) {
                 if (value) this.parentNode.appendChild(this);
-                $scope.battlefield.select("#node-" + d[name].key).classed(name, value);
+                svg.select("#node-" + d[name].key).classed(name, value);
               };
             },
-            updateAttaques: function(svg, attaques) {
-              for (index = 0; index < attaques.length; ++index) {
-                action = attaques[index];
-                if (!action) {
-                  var bundle = d3.layout.bundle();
-                  var splines = bundle(attaques);
-                  var path = svg.selectAll("path.link")
-                    .data(attaques)
-                    .enter().append("svg:path")
-                    .attr("class", function(d) { return "link source-" + d.source.key + " target-" + d.target.key; })
-                    .attr("d", function(d, i) { return line(splines[i]); });
+            displayAttaques: function(svg, attaques) {
+              for (var index = 0; index < attaques.length; ++index) {
+                var actions = attaques[index];
+                if (actions && actions.length != 0) {
+                  actions.forEach(function (action) {               
+                    var bundle = d3.layout.bundle();
+                    var splines = bundle(action);
+                    var path = svg.selectAll("path.link")
+                      .data(action)
+                      .enter().append("svg:path")
+                      .attr("class", function(d) { return "link source-" + d.source.key + " target-" + d.target.key; })
+                      .attr("d", function(d, i) { return line(splines[i]); });
+                  });
                 }
               }
             }
@@ -279,13 +307,14 @@ angular.module('battleGitApp')
             $scope.interval = 2000;
             $scope.page = 0;
             $scope.perPage = 1;
-            $scope.maxSteps = 1;
+            $scope.maxSteps = 10;
             $scope.baseLife = 100;
             $scope.baseAttack = 100;
             $scope.baseDefense = 100;
 
             // Global initialization.
             $scope.users = {};
+            $scope.nodes = [];
             $scope.battlefield = displayService.createBattlefield();
             $scope.attaques = [];
 
@@ -360,22 +389,23 @@ angular.module('battleGitApp')
                           // Modifier: Apply.
                           $scope.users[commit.committerId].attack += $scope.attackModifier;
 
-                          // Action: Initialization.
-                          $scope.action = processService.processAction(commit);
+                          $scope.nodeRoot = displayService.createNodesFromUsers($scope.users);
 
+                          // Action: Initialization.
+                          // $scope.action = processService.processAction(commit);
+
+                          $scope.action = processService.generateAttaques($scope.nodeRoot.children);
                           // Action: Apply.
 //                          console.log($scope.action);
-                          $scope.action.targets.forEach(function (target) {
-                            console.log(target.login);
+                          //$scope.action.targets.forEach(function (target) {
+                          //  console.log(target.login);
                             
-                            $scope.damage = Math.max(0, $scope.users[commit.committerId].attack - $scope.users[target.id].defense);
+                          //  $scope.damage = Math.max(0, $scope.users[commit.committerId].attack - $scope.users[target.id].defense);
 //                            console.log($scope.damage);
                             
-                            $scope.users[target.id].life -= $scope.damage;
-                          });
-                          
-                          var nodes = displayService.createNodesFromUsers($scope.users);
-                          displayService.displayNodes($scope.battlefield, nodes);
+                          //  $scope.users[target.id].life -= $scope.damage;
+                          //});
+                          displayService.displayNodes($scope.battlefield, $scope.nodeRoot);
                           $scope.attaques.push($scope.action);
                           displayService.displayAttaques($scope.battlefield, $scope.attaques);
                           if ($scope.attaques.length > 5) {
