@@ -158,7 +158,7 @@ angular.module('battleGitApp')
               action.source = commit.committerId;
 
               commit.files.forEach(function (file) {
-                if (!action.targets.hasOwnProperty(file.previousCommitter.id)) {
+                if (file.hasOwnProperty('previousCommitter')) {
                   action.targets.push(file.previousCommitter.id);
                 }
               });
