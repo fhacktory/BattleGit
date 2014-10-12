@@ -50,17 +50,49 @@
       <!--{{panel.commitMessage}}-->
     </div>
     <div class="panel-body">
-      <strong>Attack modifier: {{panel.attackModifier}}</strong>
+      <div class="btn-group btn-group-justified">
+        <div class="btn-group">
+          <button type="button" class="btn btn-default">
+            {{panel.life}}
+            <br />
+            LIFE
+          </button>
+        </div>
+        <div class="btn-group">
+          <button type="button" class="btn btn-default">
+            {{panel.attack}} ({{panel.attackModifier}})
+            <br />
+            ATTACK
+          </button>
+        </div>
+        <div class="btn-group">
+          <button type="button" class="btn btn-default">
+            {{panel.defense}} ({{panel.defenseModifier}})
+            <br />
+            DEFENSE
+          </button>
+        </div>
+      </div>
+      
       <ul ng-repeat="attackModifier in panel.attackModifiers">
-        <li>{{attackModifier.rule}} : {{attackModifier.value}}</li>
+        <li>{{attackModifier.rule}} : {{attackModifier.value}} ATT</li>
+      </ul>
+      <ul ng-repeat="defenseModifier in panel.defenseModifiers">
+        <li>{{defenseModifier.rule}} : {{defenseModifier.value}} DEF</li>
       </ul>
       
-      <strong>Damages: {{panel.damage}}</strong>
+      <div class="btn-group btn-group-justified">
+        <div class="btn-group">
+          <button type="button" class="btn btn-default">
+            {{panel.damage}}
+            <br />
+            Damages
+          </button>
+        </div>
+      </div>
+      
       <ul ng-repeat="damage in panel.damages">
-        <li>Target ID: {{damage.targetId}}</li>
-        <ul>
-          <li>Damage: {{damage.damage}}</li>
-        </ul>
+        <li>{{damage.targetLogin}} : {{damage.damage}}</li>
       </ul>
     </div>
   </div>

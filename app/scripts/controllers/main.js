@@ -152,8 +152,6 @@ angular.module('battleGitApp')
               // commit.message.contains.
               [
                 'add',
-                'fix',
-                'resolve',
                 'improve'
               ].forEach(function (element) {
                 if (commit.message.toLowerCase().indexOf(element) > -1) {
@@ -165,6 +163,24 @@ angular.module('battleGitApp')
               });
 
               return attackModifiers;
+            },
+            processDefenseModifiers: function (commit) {
+              var defenseModifiers = [];
+              
+              [
+                'merge',
+                'fix',
+                'resolve'
+              ].forEach(function (element) {
+                if (commit.message.toLowerCase().indexOf(element) > -1) {
+                  defenseModifiers.push({
+                    rule: 'commit.message.contains("' + element + '")',
+                    value: 10
+                  });
+                }
+              });
+              
+              return defenseModifiers;
             },
             processAction: function (commit) {
               var action = {
@@ -400,15 +416,21 @@ angular.module('battleGitApp')
 
                           // Modifier: Initialization.
                           $scope.attackModifiers = processService.processAttackModifiers(commit);
+                          $scope.defenseModifiers = processService.processDefenseModifiers(commit);
 
                           // Modifier: Aggregation.
                           $scope.attackModifier = 0;
                           $scope.attackModifiers.forEach(function (element) {
                             $scope.attackModifier += element.value;
                           });
-
+                          $scope.defenseModifier = 0;
+                          $scope.defenseModifiers.forEach(function (element) {
+                            $scope.defenseModifier += element.value;
+                          });
+                          
                           // Modifier: Apply.
                           $scope.users[commit.committerId].attack += $scope.attackModifier;
+                          $scope.users[commit.committerId].defense += $scope.defenseModifier;
 
                           $scope.nodeRoot = displayService.createNodesFromUsers($scope.users);
 
@@ -438,6 +460,7 @@ angular.module('battleGitApp')
                               
                               $scope.damages.push({
                                 targetId: target.id,
+                                targetLogin: target.login,
                                 damage: damage
                               });
                             }
@@ -459,8 +482,13 @@ angular.module('battleGitApp')
                             committerLogin: commit.committerLogin,
                             attackModifier: $scope.attackModifier,
                             attackModifiers: $scope.attackModifiers,
+                            defenseModifier: $scope.defenseModifier,
+                            defenseModifiers: $scope.defenseModifiers,
                             damage: $scope.damage,
-                            damages: $scope.damages
+                            damages: $scope.damages,
+                            life: $scope.users[commit.committerId].life,
+                            attack: $scope.users[commit.committerId].attack,
+                            defense: $scope.users[commit.committerId].defense
                           });
                         });
                       });
