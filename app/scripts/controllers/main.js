@@ -409,8 +409,8 @@ angular.module('battleGitApp')
             $scope.interval = 4000;
             $scope.page = 1;
             $scope.perPage = 1;
-            $scope.maxSteps = 10;
-            $scope.baseLife = 500;
+            $scope.maxSteps = 100;
+            $scope.baseLife = 100;
             $scope.baseAttack = 100;
             $scope.baseDefense = 100;
             
@@ -552,7 +552,7 @@ angular.module('battleGitApp')
                                 };
                               }
                               
-                              var damage = Math.max(0, $scope.users[commit.committerId].attack - $scope.users[target.id].defense / 10);
+                              var damage = Math.max(0, $scope.users[commit.committerId].attack - $scope.users[target.id].defense / 100);
                               $scope.users[target.id].life -= damage;
                               
                               $scope.damages.push({
